@@ -368,7 +368,7 @@ const fetchUsers = async () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
             {isAdmin ? "All Submissions" : "Assignments"}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -794,7 +794,7 @@ const fetchUsers = async () => {
                             }}
                           />
                           <Button
-                            className="w-full bg-gradient-primary mt-2"
+                            className="w-full bg-gradient-accent mt-2"
                             onClick={() => document.getElementById(`submit-${a.id}`)?.click()}
                             disabled={!!submittingId}
                           >

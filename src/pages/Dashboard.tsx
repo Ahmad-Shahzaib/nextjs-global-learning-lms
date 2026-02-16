@@ -247,7 +247,7 @@ export default function Dashboard() {
                       />
                     </div>
                     <Button
-                      className="w-full bg-gradient-primary"
+                      className="w-full bg-gradient-accent"
                       onClick={() => navigate(`/courses/${course.id}`)}
                     >
                       <PlayCircle className="mr-2 h-4 w-4" />

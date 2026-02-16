@@ -89,7 +89,7 @@ export default function Auth() {
           <div className="flex justify-start">
             <img
               src={logoUrl}
-              alt="UE Campus"
+              alt="Global Learning LMS"
               className="h-20 w-auto mb-16"
             />
           </div>
