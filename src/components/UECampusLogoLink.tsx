@@ -1,4 +1,6 @@
-import type { ComponentPropsWithoutRef } from "react";
+
+import ueLogo from "../../public/uecampus-logo.png";
+
 
 interface UECampusLogoLinkProps {
   className?: string;
@@ -11,13 +13,13 @@ export function UECampusLogoLink({
 }: UECampusLogoLinkProps) {
   return (
     <a
-      href="https://www.uecampus.com"
+      href="#"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Visit UECampus homepage"
       className={`inline-flex items-center ${containerClassName}`.trim()}
     >
-      <img src="/logo.png" alt="UECampus logo" className={className} />
+      <img src={ueLogo} alt="UECampus logo" className={className} />
       <span className="sr-only">Visit the UECampus website</span>
     </a>
   );

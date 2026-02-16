@@ -2324,21 +2324,21 @@ export default function CourseDetail() {
         (type === "quiz" && selectedFile._isQuiz));
     const icon =
       type === "assignment" ? (
-        <Upload className="h-4 w-4 text-orange-500" />
+        <Upload className="h-4 w-4 text-warning" />
       ) : type === "quiz" ? (
-        <FileQuestion className="h-4 w-4 text-blue-500" />
+        <FileQuestion className="h-4 w-4 text-primary" />
       ) : isText || isBrief ? (
         <BookOpen className="h-4 w-4 text-slate-600" />
       ) : isPdf ? (
-        <FileText className="h-4 w-4 text-red-500" />
+        <FileText className="h-4 w-4 text-destructive" />
       ) : isPowerPoint ? (
-        <Presentation className="h-4 w-4 text-amber-500" />
+        <Presentation className="h-4 w-4 text-warning" />
       ) : isVideo ? (
-        <Video className="h-4 w-4 text-indigo-500" />
+        <Video className="h-4 w-4 text-primary" />
       ) : isImage ? (
-        <File className="h-4 w-4 text-emerald-500" />
+        <File className="h-4 w-4 text-success" />
       ) : isDrive ? (
-        <FileText className="h-4 w-4 text-green-500" />
+        <FileText className="h-4 w-4 text-success" />
       ) : (
         <File className="h-4 w-4 text-slate-500" />
       );

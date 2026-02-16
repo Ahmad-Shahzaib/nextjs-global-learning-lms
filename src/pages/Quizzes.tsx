@@ -246,13 +246,13 @@ export default function Quizzes() {
               ) : (
                 <>
                   <div>
-                    <Badge variant="secondary">{q.course}</Badge>
+                    <Badge variant="secondary">{q.course_id}</Badge>
                     <h3 className="text-xl font-semibold mt-2">{q.title}</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Questions</p>
-                      <p className="font-semibold">{q.questions}</p>
+                      <p className="font-semibold">-</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Duration</p>
@@ -265,7 +265,7 @@ export default function Quizzes() {
                       <p className="text-sm mt-1">Your Best: {q.user_best_score}%</p>
                     </div>
                   )}
-                  <Button className="w-full bg-gradient-primary">
+                  <Button className="w-full bg-gradient-accent">
                     <PlayCircle className="mr-2 h-4 w-4" />
                     {q.status === "available" ? "Start Quiz" : "Retake"}
                   </Button>

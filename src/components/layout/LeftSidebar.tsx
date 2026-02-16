@@ -80,7 +80,7 @@ export function LeftSidebar() {
           <div className="relative">
             <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-glow">
               <AvatarImage src={avatarUrl} alt={userName} />
-              <AvatarFallback className="bg-gradient-primary text-white">
+              <AvatarFallback className="bg-gradient-accent text-white">
                 {userName ? userName.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
               </AvatarFallback>
             </Avatar>
@@ -109,7 +109,7 @@ export function LeftSidebar() {
             "text-sidebar-foreground hover:text-sidebar-primary-foreground",
             "focus:outline-none focus:ring-2 focus:ring-sidebar-ring"
           )}
-          activeClassName="bg-gradient-primary text-white font-medium shadow-glow"
+          activeClassName="bg-gradient-accent text-white font-medium shadow-glow"
         >
           {/* Hover background effect */}
           <div className="absolute inset-0 bg-sidebar-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

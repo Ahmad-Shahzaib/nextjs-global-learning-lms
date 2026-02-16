@@ -162,7 +162,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   <span>Settings</span>
                   <div className="flex items-center gap-2">
                     {isEditMode && <Badge variant="outline" className="text-xs">EDITING</Badge>}
-                    {isAdmin && <Badge className="text-xs bg-primary">ADMIN</Badge>}
+                    {isAdmin && <Badge className="text-xs bg-primary text-primary-foreground">ADMIN</Badge>}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -232,7 +232,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content */}
         <main
-          className="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-6 lg:p-8 relative h-[calc(100vh-4rem)]"
+          className="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-6 lg:p-8 relative h-[calc(100vh-4rem)] bg-sidebar"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           {/* Background decorative elements */}
@@ -247,13 +247,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Right Sidebar */}
         <aside
-          className={`transition-all duration-300 ease-smooth overflow-y-auto hide-scrollbar h-[calc(100vh-4rem)] border-l border-border/50 bg-card shadow-2xl z-40 ${rightSidebarClasses}`}
+          className={`transition-all duration-300 ease-smooth overflow-y-auto hide-scrollbar h-[calc(100vh-4rem)] border-l border-border/50 bg-sidebar shadow-2xl z-40 ${rightSidebarClasses}`}
           aria-label="Alerts and deadlines"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           <RightSidebar />
           {/* Decorative gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-bl from-accent/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
         </aside>
 
         {/* Overlay for mobile when sidebars are open */}

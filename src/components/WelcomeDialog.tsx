@@ -35,7 +35,7 @@ export function WelcomeDialog() {
         <DialogHeader className="space-y-6 text-center">
           <div className="flex justify-center">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow animate-pulse">
+              <div className="w-20 h-20 rounded-full bg-gradient-accent flex items-center justify-center shadow-glow animate-pulse">
                 <Sparkles className="h-10 w-10 text-white" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-accent flex items-center justify-center animate-bounce">
@@ -44,7 +44,7 @@ export function WelcomeDialog() {
             </div>
           </div>
           
-          <DialogTitle className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <DialogTitle className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
             Welcome, {userName}!
           </DialogTitle>
           

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Support() {
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-700 via-purple-700 to-primary text-white p-10 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-accent to-accent text-white p-10 shadow-2xl">
         <div className="absolute inset-0 bg-primary/30" />
         <div className="relative z-10 space-y-3 text-center">
           <Badge className="bg-white/20 text-white border-white/30">We&apos;re here to help</Badge>

@@ -54,7 +54,7 @@ export default function Profile() {
       setFullName(user?.full_name || "");
       const url = user?.avatar_url || "";
       setAvatarUrl(url);
-      setIdDocumentUrl(user?.id_document_url || "");
+      setIdDocumentUrl((user as any)?.id_document_url || "");
       try {
         if (url) localStorage.setItem("avatar_url", url);
       } catch {
@@ -207,7 +207,7 @@ export default function Profile() {
     <div className="container max-w-4xl py-8">
       <Card className="border-border/50 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
+          <CardTitle className="text-2xl bg-gradient-accent bg-clip-text text-transparent">
             Profile Settings
           </CardTitle>
           <CardDescription>

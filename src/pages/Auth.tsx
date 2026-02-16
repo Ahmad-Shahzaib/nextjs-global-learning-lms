@@ -9,7 +9,6 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api";
-import ueLogo from "@/assets/ue-campus-logo.png";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address").trim().toLowerCase(),
@@ -30,6 +29,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const logoUrl = `${BASENAME || ""}/uecampus-logo.png`;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,24 +78,23 @@ export default function Auth() {
   };
 
   return (
-    <div className="relative min-h-screen flex overflow-hidden bg-[#191c3b]">
+    <div className="relative min-h-screen flex overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-gradient-hero opacity-70 pointer-events-none" />
       <div
-        className="absolute inset-0 bg-white"
+        className="absolute inset-0 bg-card"
         style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%, 0 100%)" }}
       />
-      {/* LEFT SIDE */}
       <div className="hidden lg:flex w-1/2 relative">
         <div className="flex flex-col justify-center px-20 xl:px-28 w-full">
           <div className="flex justify-start">
             <img
-              src={ueLogo}
+              src={logoUrl}
               alt="UE Campus"
               className="h-20 w-auto mb-16"
             />
           </div>
-
-          <div className="space-y-6 text-[#1f1f1f]">
-            <div className="h-1 w-14 bg-[#5b4bdf]" />
+          <div className="space-y-6 text-foreground">
+            <div className="h-1 w-14 bg-primary" />
             <h2 className="text-5xl font-bold leading-tight">
               Study anywhere
               <br />
@@ -104,20 +103,17 @@ export default function Auth() {
           </div>
         </div>
       </div>
-
-      {/* RIGHT SIDE */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-12 py-16 relative z-10">
-        <Card className="w-full max-w-lg bg-[#191c3b] border border-white/10 text-white shadow-2xl">
+        <Card className="w-full max-w-lg bg-card border border-border text-foreground shadow-2xl animate-fade-in">
           <CardContent className="pt-8 pb-10 px-8 space-y-6">
             <p className="text-2xl font-semibold">Log in to your account</p>
-
             <form
               key={formKey}
               onSubmit={handleLogin}
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-white/80">
+                <Label className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
                   Email
                 </Label>
@@ -127,13 +123,11 @@ export default function Auth() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className="bg-white text-black"
                 />
               </div>
-
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-white/80">
+                  <Label className="flex items-center gap-2 text-muted-foreground">
                     <Lock className="h-4 w-4" />
                     Password
                   </Label>
@@ -142,7 +136,7 @@ export default function Auth() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="h-8 px-2 text-white"
+                    className="h-8 px-2"
                   >
                     {showPassword ? (
                       <EyeOff className="h-3 w-3" />
@@ -157,15 +151,13 @@ export default function Auth() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className="bg-white text-black"
                 />
               </div>
-
               <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="link"
-                  className="text-xs text-white/60 px-0"
+                  className="text-xs text-muted-foreground px-0"
                   onClick={() =>
                     toast.info("Use your administrator to reset your password.")
                   }
@@ -173,26 +165,24 @@ export default function Auth() {
                   Forgot your password?
                 </Button>
               </div>
-
               <Button
                 type="submit"
-                className="w-full bg-[#6a1b9a] hover:bg-[#591782] text-white"
+                className="w-full"
                 disabled={loading}
               >
                 {loading ? "Signing in..." : "Login"}
               </Button>
-
               <Button
                 type="button"
-                className="w-full bg-[#6a1b9a] hover:bg-[#591782] text-white"
+                variant="secondary"
+                className="w-full"
                 onClick={() =>
                   window.open("https://www.uecampus.com/enquire-now", "_blank")
                 }
               >
                 Signup
               </Button>
-
-              <p className="text-xs text-white/60 text-center pt-2">
+              <p className="text-xs text-muted-foreground text-center pt-2">
                 Need access? Contact your administrator.
               </p>
             </form>
