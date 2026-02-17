@@ -9,9 +9,7 @@ import { Package, Plus, Download, Trash2, Edit, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { toast } from "sonner";
-// No backend in this environment — using local mock data only
-
-// Mock software data for UI/dev
+ 
 const MOCK_SOFTWARES = [
   {
     id: "sw1",

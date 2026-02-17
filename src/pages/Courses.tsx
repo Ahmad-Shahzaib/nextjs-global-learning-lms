@@ -62,11 +62,10 @@ export default function Courses() {
   };
   const [duplicatingCourseId, setDuplicatingCourseId] = useState<string | null>(null);
 
-  // Guards stale async completions
+ 
   const requestIdRef = useRef(0);
 
-  // ---- helpers -------------------------------------------------------------
-
+ 
   function normalizeCoursesResponse(raw: unknown): Course[] {
     // WHY: Backend occasionally returns different shapes; normalize once.
     if (Array.isArray(raw)) return raw as Course[];
@@ -97,7 +96,7 @@ export default function Courses() {
   useEffect(() => {
     if (!user) return;
 
-    // UI-only demo: use static sample courses instead of fetching from backend
+ 
     const sampleCourses: Course[] = [
       { id: "c1", title: "Introduction to Biology", code: "BIO101", category: "Bachelor's", description: "Basics of cell biology", duration: "10 weeks" },
       { id: "c2", title: "Calculus I", code: "MATH101", category: "Bachelor's", description: "Limits, derivatives, integrals", duration: "12 weeks" },
@@ -124,7 +123,7 @@ export default function Courses() {
         return;
       }
 
-      // Students: fetch in parallel and pick the best non-empty
+  
       const [catalogRes, enrolledRes] = await Promise.allSettled([
         fetchCatalog(),
         fetchEnrolled()
