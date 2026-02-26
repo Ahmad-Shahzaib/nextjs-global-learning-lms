@@ -1,7 +1,7 @@
 import LMSGuides from "@/components/LMSGuides";
-import UECampusGuides from "@/components/UECampusGuides";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import GlobalLearningGuides from "@/components/UECampusGuides";
 
 export default function Guides() {
   const { isAdmin } = useEditMode();
@@ -13,22 +13,22 @@ export default function Guides() {
           Learning Guides
         </h1>
         <p className="text-muted-foreground mt-1">
-          LMS tutorials and UECampus video guides
+          LMS tutorials and Global Learning video guides
         </p>
       </div>
 
       <Tabs defaultValue="lms-guides" className="w-full">
         <TabsList className="grid w-full max-w-xl grid-cols-2">
           <TabsTrigger value="lms-guides">LMS Guides</TabsTrigger>
-          <TabsTrigger value="uecampus-guides">UECampus Guides</TabsTrigger>
+          <TabsTrigger value="global-learning-guides">Global Learning Guides</TabsTrigger>
         </TabsList>
 
         <TabsContent value="lms-guides" className="mt-6">
           <LMSGuides isAdmin={isAdmin} />
         </TabsContent>
 
-        <TabsContent value="uecampus-guides" className="mt-6">
-          <UECampusGuides isAdmin={isAdmin} />
+        <TabsContent value="global-learning-guides" className="mt-6">
+          <GlobalLearningGuides isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
     </div>

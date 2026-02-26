@@ -135,14 +135,17 @@ export default function Users() {
       const validated = userSchema.parse(formData);
       await apiFetch("/users", {
         method: "POST",
-        body: {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           email: validated.email,
           password: validated.password,
           full_name: validated.full_name,
           role: validated.role,
           user_id: formData.user_id,
           course_id: formData.course_id || null,
-        },
+        }),
       });
       toast.success("User created successfully");
       setDialogOpen(false);
@@ -176,9 +179,12 @@ export default function Users() {
     try {
       await apiFetch(`/users/${target.id}`, {
         method: "PATCH",
-        body: {
-          is_blocked: !target.is_blocked,
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          is_blocked: !target.is_blocked,
+        }),
       });
       toast.success(target.is_blocked ? "User unblocked" : "User blocked");
       await loadUsers();
@@ -198,7 +204,10 @@ export default function Users() {
     try {
       await apiFetch(`/users/${selectedUser.id}/reset-password`, {
         method: "POST",
-        body: { new_password: newPassword },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ new_password: newPassword }),
       });
       toast.success("Password reset successfully");
       setPasswordDialogOpen(false);
@@ -236,10 +245,13 @@ export default function Users() {
     try {
       await apiFetch(`/users/${selectedUser.id}`, {
         method: "PATCH",
-        body: {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           full_name: editFormData.full_name,
           role: editFormData.role,
-        },
+        }),
       });
       toast.success("User updated");
       setEditDialogOpen(false);
@@ -273,7 +285,7 @@ export default function Users() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `uecampus-users-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    link.download = `global-learning-users-${new Date().toISOString().slice(0, 10)}.xlsx`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -304,7 +316,7 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
             User Management
@@ -558,8 +570,8 @@ export default function Users() {
             {filteredUsers.map((user) => (
               <Card key={user.id} className="border-border/50">
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <UsersIcon className="h-6 w-6 text-primary" />
                       </div>
@@ -587,7 +599,7 @@ export default function Users() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap sm:flex-nowrap sm:gap-2 w-full sm:w-auto">
                       <Button
                         variant="ghost"
                         size="icon"

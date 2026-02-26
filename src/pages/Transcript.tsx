@@ -523,7 +523,13 @@ export default function Transcript() {
         units,
         pdf_base64: pdfBase64,
       };
-      await apiFetch("/transcripts", { method: "POST", body: payload });
+      await apiFetch("/transcripts", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       toast.success("Transcript sent");
       setDialogOpen(false);
       if (viewUserId === selectedUser) {

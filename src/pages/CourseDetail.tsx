@@ -70,7 +70,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DraggableMaterialList, DraggableAssignmentList, DraggableQuizList } from "@/components/DraggableMaterialList";
 import { CertificateGeneratedDialog } from "@/components/CertificateGeneratedDialog";
 import { Switch } from "@/components/ui/switch";
-import { UECampusLogoLink } from "@/components/UECampusLogoLink";
+import { GlobalLearningLogoLink } from "@/components/UECampusLogoLink";
 import quizIcon from "@/assets/quiz-icon.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -3234,7 +3234,7 @@ export default function CourseDetail() {
     <div className="h-screen flex flex-col bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex items-center gap-4 px-4 py-3 md:px-6 max-w-[1400px]">
-          <UECampusLogoLink className="h-9 w-auto" />
+          <GlobalLearningLogoLink className="h-9 w-auto" />
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-4">
               <h1 className="truncate text-sm md:text-base font-semibold text-slate-800">

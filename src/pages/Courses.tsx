@@ -371,24 +371,7 @@ export default function Courses() {
                 </Link>
                 {isAdmin && (
                   <>
-                    <Button
-                      variant="ghost"
-                      className="text-xs whitespace-nowrap flex items-center gap-1"
-                      onClick={() => handleDuplicateCourse(course)}
-                      disabled={duplicatingCourseId === course.id}
-                    >
-                      {duplicatingCourseId === course.id ? (
-                        <>
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          Duplicating...
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-3 w-3" />
-                          Duplicate
-                        </>
-                      )}
-                    </Button>
+                   
                     <Button
                       variant="outline"
                       className="text-xs whitespace-nowrap"

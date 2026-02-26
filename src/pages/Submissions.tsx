@@ -257,7 +257,7 @@ export default function Submissions() {
 
   return (
     <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
         <h1 className="text-3xl font-bold">Assignment Submissions</h1>
         <div className="flex gap-3">
           <Select value={selectedCourse} onValueChange={setSelectedCourse}>

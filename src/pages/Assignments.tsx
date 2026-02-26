@@ -366,7 +366,11 @@ const fetchUsers = async () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+        <div
+          className={
+            "flex justify-between items-center flex-col gap-2 sm:flex-row sm:gap-0"
+          }
+        >
         <div>
           <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
             {isAdmin ? "All Submissions" : "Assignments"}
@@ -376,7 +380,7 @@ const fetchUsers = async () => {
           </p>
         </div>
         {isAdmin && (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 w-full sm:flex-row sm:w-auto">
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="border-primary/20">
@@ -427,7 +431,7 @@ const fetchUsers = async () => {
       </div>
 
       {isAdmin && (
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <Label className="text-sm font-medium">Filter by User:</Label>
           <Select value={filterUserId} onValueChange={setFilterUserId}>
           <SelectTrigger className="w-full sm:w-[250px]">
@@ -447,7 +451,7 @@ const fetchUsers = async () => {
 
       {isAdmin ? (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
             <h2 className="text-xl font-semibold">Submitted Assignments</h2>
             <Dialog open={extraAttemptsDialogOpen} onOpenChange={setExtraAttemptsDialogOpen}>
               <DialogTrigger asChild>

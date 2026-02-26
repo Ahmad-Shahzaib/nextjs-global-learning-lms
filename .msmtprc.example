@@ -1,4 +1,4 @@
-# Example msmtp configuration for UECampus SMTP account.
+# Example msmtp configuration for globallearning SMTP account.
 # Copy to ~/.msmtprc (Linux/Mac) or C:\msmtp\msmtprc and `chmod 600` the file.
 
 defaults
@@ -7,13 +7,13 @@ tls_starttls off
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 auth on
 
-account uecampus
-host uecampus.com
+account globallearning
+host globallearning.com
 port 465
-user noreply@uecampus.com
-password noreplyuecampus
-from noreply@uecampus.com
+user noreply@globallearning.com
+password noreplygloballearning
+from noreply@globallearning.com
 
 logfile ~/.msmtp.log
 
-account default : uecampus
+account default : globallearning

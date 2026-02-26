@@ -19,7 +19,7 @@ import { RightSidebar } from "./RightSidebar";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { UECampusLogoLink } from "@/components/UECampusLogoLink";
+import { GlobalLearningLogoLink } from "@/components/UECampusLogoLink";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardLayoutProps {
@@ -112,7 +112,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           
           <div className="flex-1 flex items-center gap-4">
           <div className="flex items-center">
-            <UECampusLogoLink className="h-12 sm:h-12 w-auto" />
+            <GlobalLearningLogoLink className="h-12 sm:h-12 w-auto" />
           </div>
             
             <div className="hidden md:flex flex-1 max-w-md">

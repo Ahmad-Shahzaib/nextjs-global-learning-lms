@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Video, Upload, Trash2, Youtube, Play } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
-interface UECampusGuide {
+interface GlobalLearningGuide {
   id: string;
   title: string;
   description: string;
@@ -23,23 +23,23 @@ interface UECampusGuide {
   created_at: string;
 }
 
-interface UECampusGuidesProps {
+interface GlobalLearningGuidesProps {
   isAdmin: boolean;
   maxDisplay?: number;
   showUploadButton?: boolean;
 }
 
-export default function UECampusGuides({
+export default function GlobalLearningGuides({
   isAdmin,
   maxDisplay,
   showUploadButton = true,
-}: UECampusGuidesProps) {
+}: GlobalLearningGuidesProps) {
   const { user } = useAuth();
-  const [guides, setGuides] = useState<UECampusGuide[]>([]);
+  const [guides, setGuides] = useState<GlobalLearningGuide[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedGuide, setSelectedGuide] = useState<UECampusGuide | null>(null);
+  const [selectedGuide, setSelectedGuide] = useState<GlobalLearningGuide | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -58,11 +58,11 @@ export default function UECampusGuides({
   const loadGuides = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch<UECampusGuide[]>("/uecampus-guides");
+      const data = await apiFetch<GlobalLearningGuide[]>("/globallearning-guides");
       setGuides((data as any) || []);
     } catch (error) {
-      console.error("Error loading UECampus guides:", error);
-      toast.error("Failed to load UECampus guides");
+      console.error("Error loading globallearning guides:", error);
+      toast.error("Failed to load globallearning guides");
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function UECampusGuides({
         body.append("file", formData.file);
       }
 
-      await apiFetch("/uecampus-guides", { method: "POST", body });
+      await apiFetch("/globallearning-guides", { method: "POST", body });
 
       toast.success("Guide uploaded successfully");
       setDialogOpen(false);
@@ -143,11 +143,11 @@ export default function UECampusGuides({
     }
   };
 
-  const handleDelete = async (guide: UECampusGuide) => {
+  const handleDelete = async (guide: GlobalLearningGuide) => {
     if (!confirm("Are you sure you want to delete this guide?")) return;
 
     try {
-      await apiFetch(`/uecampus-guides/${guide.id}`, { method: "DELETE" });
+      await apiFetch(`/globallearning-guides/${guide.id}`, { method: "DELETE" });
 
       toast.success("Guide deleted successfully");
       loadGuides();
@@ -157,7 +157,7 @@ export default function UECampusGuides({
     }
   };
 
-  const handleView = async (guide: UECampusGuide) => {
+  const handleView = async (guide: GlobalLearningGuide) => {
     setSelectedGuide(guide);
   };
 
@@ -176,7 +176,7 @@ export default function UECampusGuides({
       {showUploadButton && (
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-semibold">UECampus Guides</h2>
+            <h2 className="text-2xl font-semibold">globallearning Guides</h2>
             <p className="text-sm text-muted-foreground">
               Admin-uploaded video tutorials
             </p>
@@ -191,7 +191,7 @@ export default function UECampusGuides({
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add UECampus Guide</DialogTitle>
+                  <DialogTitle>Add globallearning Guide</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleUpload} className="space-y-4">
                   <div className="space-y-2">
@@ -285,7 +285,7 @@ export default function UECampusGuides({
       {displayGuides.length === 0 ? (
         <div className="text-center py-12">
           <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No UECampus guides available yet</p>
+          <p className="text-muted-foreground">No globallearning guides available yet</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

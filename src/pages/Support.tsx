@@ -25,8 +25,7 @@ export default function Support() {
             <CardTitle>Phone</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-muted-foreground">
-            <p>Call us Monday to Friday, 9:00 AM - 6:00 PM (GMT+1)</p>
-            <p className="text-lg font-semibold text-primary dark:text-primary-foreground">+44 7586 797014 (UK)</p>
+            <p>+971 50 285 9767</p>
           </CardContent>
         </Card>
 
@@ -39,9 +38,8 @@ export default function Support() {
           </CardHeader>
           <CardContent className="space-y-2 text-muted-foreground">
             <div className="space-y-1">
-              <p><span className="font-semibold text-foreground">General:</span> info@uecampus.com</p>
-              <p><span className="font-semibold text-foreground">Admissions:</span> admissions@uecampus.com</p>
-              <p><span className="font-semibold text-foreground">Support:</span> support@uecampus.com</p>
+              <p><span className="font-semibold text-foreground">Admissions:</span> admissions@globallearnerseducation.com</p>
+              <p><span className="font-semibold text-foreground">Support:</span> support@globallearnerseducation.com</p>
             </div>
           </CardContent>
         </Card>
@@ -54,9 +52,7 @@ export default function Support() {
             <CardTitle>Office Hours</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-muted-foreground">
-            <p>Monday - Friday: 9:00 AM - 6:00 PM (GMT+1)</p>
-            <p>Saturday: 9:00 AM - 9:00 PM (GMT) via live chat</p>
-            <p>Sunday: Closed</p>
+            <p>Monday to Sunday: 9:00 AM - 9:00 PM</p>
           </CardContent>
         </Card>
 
@@ -68,9 +64,8 @@ export default function Support() {
             <CardTitle>Mailing Address</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-muted-foreground">
-            <p>UeCampus Headquarters</p>
-            <p>Office 249, 2nd Floor, Titan Court,</p>
-            <p>3 Bishop Square, Hatfield, Hertfordshire, England, AL10 9NA</p>
+            <p>Global Learners Education FZE</p>
+            <p>Sharjah Research Technology and Innovation Park, UAE.</p>
           </CardContent>
         </Card>
       </div>
@@ -85,10 +80,10 @@ export default function Support() {
           </p>
           <div className="aspect-video w-full overflow-hidden rounded-xl border border-border/60">
             <iframe
-              src="https://calendly.com/uecampus-support"
+              src="https://calendly.com/globallearnerseducation-support/30min"
               className="w-full h-full"
               frameBorder="0"
-              title="Book a meeting with UeCampus Support"
+              title="Book a meeting with Global Learners Education Support"
             />
           </div>
         </CardContent>

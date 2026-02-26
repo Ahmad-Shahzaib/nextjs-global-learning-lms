@@ -29,7 +29,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formKey, setFormKey] = useState(0);
-  const logoUrl = `${BASENAME || ""}/uecampus-logo.png`;
+  const logoUrl = `${BASENAME || ""}`;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,7 +177,7 @@ export default function Auth() {
                 variant="secondary"
                 className="w-full"
                 onClick={() =>
-                  window.open("https://www.uecampus.com/enquire-now", "_blank")
+                  window.open("https://www.globallearning.com/enquire-now", "_blank")
                 }
               >
                 Signup
