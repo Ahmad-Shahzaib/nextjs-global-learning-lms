@@ -2,7 +2,11 @@
 // This file removes remote API endpoints and network logic so the app
 // can run purely as a UI/navigation shell. Networked features are disabled.
 
-export const API_BASE_URL = "";
+// Use API base URL from environment variable, fallback to default
+export const API_BASE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+    ? import.meta.env.VITE_API_BASE_URL.replace(/\/?$/, "/")
+    : "https://api.globallearnerseducation.com/api/";
 
 export function resolveStorageUrl(path?: string): string {
   if (!path) return "";
@@ -150,146 +154,45 @@ async function delay<T>(value: T, ms = 100) {
 
 export async function apiFetch<T = any>(path: string, options: ApiInit = {}): Promise<T> {
   const method = (options.method || "GET").toUpperCase();
-  const parts = splitPath(path);
-
-  // AUTH endpoints (mock)
-  if (parts[0] === "auth") {
-    const sub = parts[1] || "";
-
-    // POST /auth/login
-    if (sub === "login" && method === "POST") {
-      const body = options.body ? JSON.parse(String(options.body)) : {};
-      const email = String(body?.email || "").trim().toLowerCase();
-      const password = String(body?.password || "");
-
-      const found = AUTH_USERS.find((u) => u.email.toLowerCase() === email);
-      await delay(null, 200);
-      if (!found || found.password !== password) {
-        throw new ApiError("Invalid credentials", 401);
-      }
-
-      const token = `mock-${btoa(email)}`;
-      const user = {
-        id: found.id,
-        email: found.email,
-        full_name: found.full_name,
-        avatar_url: found.avatar_url || "",
-        is_blocked: !!found.is_blocked,
-      };
-      return delay(({ token, user, roles: found.roles || [] } as unknown) as T, 150);
+  // If API_BASE_URL is set, use real network request
+  if (API_BASE_URL) {
+    const url = path.startsWith("http") ? path : API_BASE_URL.replace(/\/$/, "") + (path.startsWith("/") ? path : "/" + path);
+    const headers: Record<string, string> = options.headers ? { ...(options.headers as Record<string, string>) } : {};
+    // mirror axiosInstance default API key header
+    if (!headers['x-api-key']) {
+      headers['x-api-key'] = '1234';
     }
 
-    // GET /auth/me
-    if (sub === "me" && method === "GET") {
+    if (!options.skipAuthHeader) {
       const token = options.token || getAuthToken();
-      await delay(null, 150);
-      if (!token || typeof token !== "string") {
-        throw new ApiError("Unauthorized", 401);
-      }
-
-      let email = "";
-      if (token.startsWith("mock-")) {
-        try {
-          email = atob(token.replace(/^mock-/, ""));
-        } catch (e) {
-          throw new ApiError("Invalid token", 401);
-        }
-      }
-
-      const found = AUTH_USERS.find((u) => u.email.toLowerCase() === String(email).toLowerCase());
-      if (!found) throw new ApiError("Unauthorized", 401);
-
-      const user = {
-        id: found.id,
-        email: found.email,
-        full_name: found.full_name,
-        avatar_url: found.avatar_url || "",
-        is_blocked: !!found.is_blocked,
-      };
-      return delay(({ user, roles: found.roles || [] } as unknown) as T, 100);
+      if (token) headers['Authorization'] = `Bearer ${token}`;
     }
+
+    const isFormData = options.body instanceof FormData;
+    if (!isFormData && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const fetchOptions: RequestInit = {
+      ...options,
+      method,
+      headers,
+    };
+    // Remove custom fields not valid for fetch
+    delete (fetchOptions as any).timeoutMs;
+    delete (fetchOptions as any).skipAuthHeader;
+    delete (fetchOptions as any).token;
+    const response = await fetch(url, fetchOptions);
+    if (!response.ok) {
+      let errorData;
+      try { errorData = await response.json(); } catch { errorData = await response.text(); }
+      throw new ApiError(response.statusText, response.status, errorData);
+    }
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      return (await response.json()) as T;
+    }
+    return (await response.text()) as unknown as T;
   }
-
-  // USERS
-  if (parts[0] === "users") {
-    if (method === "GET") return delay((USERS as unknown) as T);
-    if (method === "POST") {
-      const body = options.body ? JSON.parse(String(options.body)) : {};
-      const newU = { id: `u-${Date.now()}`, ...(body || {}) };
-      USERS.unshift(newU);
-      return delay((newU as unknown) as T);
-    }
-  }
-
-  // ASSIGNMENTS
-  if (parts[0] === "assignments") {
-    const id = parts[1];
-    if (method === "GET" && !id) return delay((ASSIGNMENTS as unknown) as T);
-    if (method === "GET" && id) {
-      const found = ASSIGNMENTS.find(a => a.id === id);
-      return delay((found || null) as unknown as T);
-    }
-    if (method === "POST") {
-      const body = options.body ? JSON.parse(String(options.body)) : {};
-      const newA = { id: `a-${Date.now()}`, ...(body || {}) };
-      ASSIGNMENTS.unshift(newA);
-      return delay((newA as unknown) as T);
-    }
-    if (method === "PATCH" && id) {
-      const updates = options.body ? JSON.parse(String(options.body)) : {};
-      const idx = ASSIGNMENTS.findIndex(a => a.id === id);
-      if (idx >= 0) ASSIGNMENTS[idx] = { ...ASSIGNMENTS[idx], ...updates };
-      return delay((ASSIGNMENTS[idx] as unknown) as T);
-    }
-    if (method === "DELETE" && id) {
-      const idx = ASSIGNMENTS.findIndex(a => a.id === id);
-      if (idx >= 0) ASSIGNMENTS.splice(idx, 1);
-      return delay(({} as unknown) as T);
-    }
-    // special: submit
-    if (parts[2] === "submit") {
-      const form = options.body as any;
-      const newS = { id: `s-${Date.now()}`, assignment_id: parts[1], user_id: "u1", submitted_at: new Date().toISOString(), profiles: USERS[0], submitted_file: form?.get ? form.get('file')?.name || null : null };
-      SUBMISSIONS.push(newS);
-      return delay((newS as unknown) as T);
-    }
-  }
-
-  // SUBMISSIONS
-  if (parts[0] === "submissions") {
-    const id = parts[1];
-    if (method === "GET") return delay((SUBMISSIONS as unknown) as T);
-    if (method === "DELETE" && id) {
-      const idx = SUBMISSIONS.findIndex(s => s.id === id);
-      if (idx >= 0) SUBMISSIONS.splice(idx, 1);
-      return delay(({} as unknown) as T);
-    }
-  }
-
-  // SOFTWARES
-  if (parts[0] === "softwares") {
-    const id = parts[1];
-    if (method === "GET") return delay((SOFTWARES as unknown) as T);
-    if (method === "POST") {
-      const body = options.body instanceof FormData ? Object.fromEntries((options.body as FormData).entries()) : (options.body ? JSON.parse(String(options.body)) : {});
-      const newS = { id: `sw-${Date.now()}`, ...body, created_at: new Date().toISOString() };
-      SOFTWARES.unshift(newS);
-      return delay((newS as unknown) as T);
-    }
-    if ((method === "PATCH" || method === "DELETE") && id) {
-      if (method === "DELETE") {
-        const idx = SOFTWARES.findIndex(s => s.id === id);
-        if (idx >= 0) SOFTWARES.splice(idx, 1);
-        return delay(({} as unknown) as T);
-      }
-      const updates = options.body ? JSON.parse(String(options.body)) : {};
-      const idx = SOFTWARES.findIndex(s => s.id === id);
-      if (idx >= 0) SOFTWARES[idx] = { ...SOFTWARES[idx], ...updates };
-      return delay((SOFTWARES[idx] as unknown) as T);
-    }
-  }
-
-  // Default: return empty object to avoid runtime errors
-  console.warn("apiFetch mock: no route matched", path, method);
-  return delay(({} as unknown) as T);
+  // ...existing code...
 }

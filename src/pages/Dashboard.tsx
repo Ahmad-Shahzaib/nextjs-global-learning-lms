@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Clock, PlayCircle, CheckCircle2, AlertCircle, Trash2, Copy, Edit2 } from "lucide-react";
+import { BookOpen, Clock, PlayCircle, CheckCircle2, AlertCircle, Trash2, Copy, Edit2, Users, ShoppingCart, TicketCheck } from "lucide-react";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import LMSGuides from "@/components/LMSGuides";
 import { useState, useEffect } from "react";
@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store/redux/hooks";
+import { fetchAdminDashboardStats } from "@/store/redux/thunks/adminDashboardThunk";
 
 interface Course {
   id: string;
@@ -26,6 +28,10 @@ export default function Dashboard() {
   const isPrivileged = isAdmin || isEditor;
   const { user } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { counts: adminCounts, loading: adminLoading, error: adminError } = useAppSelector(
+    (state) => state.adminDashboard
+  );
   const [courses, setCourses] = useState<Course[]>([]);
   const [stats, setStats] = useState({
     totalActivity: 0,
@@ -37,6 +43,13 @@ export default function Dashboard() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [selectedTab, setSelectedTab] = useState<"assignments" | "quizzes" | null>(null);
+
+  // Fetch admin-only stats from API when user is an admin
+  useEffect(() => {
+    if (isAdmin) {
+      dispatch(fetchAdminDashboardStats());
+    }
+  }, [isAdmin, dispatch]);
 
   useEffect(() => {
     if (user) {
@@ -156,7 +169,59 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Admin-only stats pulled from /v2/admin/dashboard */}
+      {isAdmin && (
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-muted-foreground">Admin Overview</h2>
+          {adminError && (
+            <p className="text-sm text-destructive">{adminError}</p>
+          )}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="p-6 bg-gradient-card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm text-muted-foreground">Total Users</h3>
+                <Users className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-4xl font-bold">
+                {adminLoading ? "…" : (adminCounts?.total_users ?? "—")}
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-gradient-card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm text-muted-foreground">Total Courses</h3>
+                <BookOpen className="h-4 w-4 text-accent" />
+              </div>
+              <div className="text-4xl font-bold">
+                {adminLoading ? "…" : (adminCounts?.total_courses ?? "—")}
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-gradient-card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm text-muted-foreground">Total Sales</h3>
+                <ShoppingCart className="h-4 w-4 text-success" />
+              </div>
+              <div className="text-4xl font-bold">
+                {adminLoading ? "…" : (adminCounts?.total_sales ?? "—")}
+              </div>
+            </Card>
+
+            <Card className="p-6 bg-gradient-card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm text-muted-foreground">Open Tickets</h3>
+                <TicketCheck className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-4xl font-bold">
+                {adminLoading ? "…" : (adminCounts?.open_tickets ?? "—")}
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Student / general stats — hidden for admins */}
+      {!isAdmin && <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-6 bg-gradient-card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm text-muted-foreground">Total Activity</h3>
@@ -188,7 +253,7 @@ export default function Dashboard() {
           </div>
           <div className="text-4xl font-bold">{stats.totalCourses}</div>
         </Card>
-      </div>
+      </div>}
 
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Enrolled Courses</h2>

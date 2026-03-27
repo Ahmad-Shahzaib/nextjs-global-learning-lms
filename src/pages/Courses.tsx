@@ -1,4 +1,5 @@
 // src/pages/Courses.tsx
+"use client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { BookOpen, Search, Plus, Copy, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPurchasedCourses } from "@/store/redux/thunks/PurchasedCoursesThunk";
+import { RootState } from "@/store/redux/store";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
@@ -25,20 +29,18 @@ import {
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 
-interface Course {
-  id: string;
-  title: string;
-  code: string;
-  category: string;
-  description?: string;
-  duration: string;
-}
+
+// PurchasedCourse type comes from the store
+import { PurchasedCourse } from "@/store/purchasedCourses/types";
 
 export default function Courses() {
   const { user, isAdmin } = useAuth();
-
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { items: purchasedCourses, loading, error } = useSelector((state: RootState) => state.purchasedCourses);
+  // Only used for admin
+  const [courses, setCourses] = useState<PurchasedCourse[]>([]);
+  // Local loading state for admin
+  const [adminLoading, setAdminLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -49,9 +51,9 @@ export default function Courses() {
     code: ""
   });
   const [attachments, setAttachments] = useState<File[]>([]);
-  const dedupeCourses = (items: Course[]) => {
-    const seen = new Set<string>();
-    const result: Course[] = [];
+  const dedupeCourses = (items: PurchasedCourse[]) => {
+    const seen = new Set<number | string>();
+    const result: PurchasedCourse[] = [];
     for (const course of items || []) {
       if (course?.id && !seen.has(course.id)) {
         seen.add(course.id);
@@ -60,95 +62,59 @@ export default function Courses() {
     }
     return result;
   };
-  const [duplicatingCourseId, setDuplicatingCourseId] = useState<string | null>(null);
+  const [duplicatingCourseId, setDuplicatingCourseId] = useState<string | number | null>(null);
 
  
   const requestIdRef = useRef(0);
 
  
-  function normalizeCoursesResponse(raw: unknown): Course[] {
+  function normalizeCoursesResponse(raw: unknown): PurchasedCourse[] {
     // WHY: Backend occasionally returns different shapes; normalize once.
-    if (Array.isArray(raw)) return raw as Course[];
+    if (Array.isArray(raw)) return raw as PurchasedCourse[];
 
     if (raw && typeof raw === "object") {
       const obj = raw as Record<string, unknown>;
       const candidates = ["data", "items", "results", "courses"];
       for (const key of candidates) {
         const val = obj[key];
-        if (Array.isArray(val)) return val as Course[];
+        if (Array.isArray(val)) return val as PurchasedCourse[];
       }
     }
     return [];
   }
 
-  async function fetchCatalog(): Promise<Course[]> {
+  async function fetchCatalog(): Promise<PurchasedCourse[]> {
     const res = await apiFetch<unknown>("/courses");
-    return normalizeCoursesResponse(res);
-  }
-
-  async function fetchEnrolled(): Promise<Course[]> {
-    const res = await apiFetch<unknown>("/courses?enrolledOnly=true");
     return normalizeCoursesResponse(res);
   }
 
   // -------------------------------------------------------------------------
 
+
   useEffect(() => {
     if (!user) return;
+    if (!isAdmin) {
+      dispatch(fetchPurchasedCourses() as any);
+    } else {
+      loadCourses();
+    }
+  }, [user, isAdmin, dispatch]);
 
- 
-    const sampleCourses: Course[] = [
-      { id: "c1", title: "Introduction to Biology", code: "BIO101", category: "Bachelor's", description: "Basics of cell biology", duration: "10 weeks" },
-      { id: "c2", title: "Calculus I", code: "MATH101", category: "Bachelor's", description: "Limits, derivatives, integrals", duration: "12 weeks" },
-      { id: "c3", title: "Intro to Programming", code: "CS101", category: "Bachelor's", description: "Programming fundamentals with JS", duration: "8 weeks" },
-      { id: "c4", title: "Academic Writing", code: "ENG201", category: "Certificate", description: "Essay writing and research skills", duration: "6 weeks" },
-      { id: "c5", title: "Statistics for Science", code: "STAT110", category: "Bachelor's", description: "Introductory statistics", duration: "10 weeks" },
-      { id: "c6", title: "Project Management Basics", code: "PM101", category: "Diploma", description: "Fundamentals of project planning", duration: "4 weeks" },
-    ];
-
-    setCourses(dedupeCourses(sampleCourses));
-    setLoading(false);
-  }, [user, isAdmin]);
-
+  // Only used for admin, keep the old logic for admin
   const loadCourses = async () => {
     const requestId = ++requestIdRef.current;
-    setLoading(true);
-
+    setAdminLoading(true);
     try {
-      if (isAdmin) {
-        const data = await fetchCatalog();
-        if (requestId !== requestIdRef.current) return;
-        setCourses(dedupeCourses(data));
-        setLoading(false);
-        return;
-      }
-
-  
-      const [catalogRes, enrolledRes] = await Promise.allSettled([
-        fetchCatalog(),
-        fetchEnrolled()
-      ]);
-
+      const data = await fetchCatalog();
       if (requestId !== requestIdRef.current) return;
-
-      const catalog =
-        catalogRes.status === "fulfilled" ? catalogRes.value : [];
-      const enrolled =
-        enrolledRes.status === "fulfilled" ? enrolledRes.value : [];
-
-      const chosen =
-        (catalog && catalog.length > 0 && catalog) ||
-        (enrolled && enrolled.length > 0 && enrolled) ||
-        [];
-
-      setCourses(dedupeCourses(chosen));
-      setLoading(false);
+      setCourses(dedupeCourses(data));
+      setAdminLoading(false);
     } catch (error) {
       if (requestId !== requestIdRef.current) return;
       console.error("Failed to load courses", error);
       toast.error("Failed to load courses");
-      setCourses([]); // keep UI consistent
-      setLoading(false);
+      setCourses([]);
+      setAdminLoading(false);
     }
   };
 
@@ -196,7 +162,7 @@ export default function Courses() {
     }
   };
 
-  const handleDeleteCourse = async (courseId: string) => {
+  const handleDeleteCourse = async (courseId: string | number) => {
     if (
       !confirm("Are you sure you want to delete this course? This action cannot be undone.")
     ) {
@@ -212,7 +178,7 @@ export default function Courses() {
     }
   };
 
-  const handleDuplicateCourse = async (course: Course) => {
+  const handleDuplicateCourse = async (course: PurchasedCourse) => {
     setDuplicatingCourseId(course.id);
     try {
       await apiFetch(`/courses/${course.id}/duplicate`, {
@@ -227,16 +193,20 @@ export default function Courses() {
     }
   };
 
+  // For admin, use local state; for user, use Redux state
   const filteredCourses = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return courses;
-    return courses.filter((c) => {
+    const source = (isAdmin ? courses : purchasedCourses) ?? [];
+    if (!Array.isArray(source)) return [];
+    if (!q) return source;
+    return source.filter((c) => {
       const title = c.title?.toLowerCase() || "";
-      const desc = c.description?.toLowerCase() || "";
-      const code = c.code?.toLowerCase() || "";
+      // PurchasedCourse may not have description/code fields, use fallback safely
+      const desc = (c as any).description?.toLowerCase?.() || "";
+      const code = (c as any).code?.toLowerCase?.() || "";
       return title.includes(q) || desc.includes(q) || code.includes(q);
     });
-  }, [courses, searchQuery]);
+  }, [courses, purchasedCourses, searchQuery, isAdmin]);
 
   return (
     <div className="space-y-6">
@@ -254,7 +224,7 @@ export default function Courses() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add New Course
+                Add New Course 
               </Button>
             </DialogTrigger>
 
@@ -348,44 +318,61 @@ export default function Courses() {
 
       {/* Courses Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {loading && (
+        {(isAdmin ? adminLoading : loading) && (
           <Card className="p-12 text-center col-span-full">Loading courses…</Card>
         )}
 
-        {!loading &&
-          filteredCourses.map((course) => (
-            <Card key={course.id} className="h-full p-6 hover:shadow-xl transition-all">
-              <Badge className="mb-2">{course.category}</Badge>
+        {!(isAdmin ? adminLoading : loading) &&
+          filteredCourses.map((course) => {
+            const coverImage = (course as any).image || (course as any).image;
+            return (
+              <Card key={course.id} className="overflow-hidden h-full hover:shadow-xl transition-all border border-border/30">
+                <div className="relative h-44 w-full bg-slate-100">
+                  {coverImage && (
+                    <img
+                      src={coverImage}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
 
-              <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+                  <Badge className="absolute left-3 top-3 z-10 text-white bg-black/60 border border-white/30">
+                    {course.category || "Uncategorized"}
+                  </Badge>
+                </div>
 
-              <p className="text-sm text-muted-foreground mb-4">{course.code}</p>
+                <div className="p-4 space-y-2">
+                  <h3 className="text-lg font-semibold line-clamp-2">{course.title}</h3>
 
-              <div className="text-xs text-muted-foreground mb-4">
-                Duration: {course.duration}
-              </div>
+                  <p className="text-sm text-muted-foreground line-clamp-1">{(course as any).code || "No code"}</p>
 
-              <div className="flex gap-2">
-                <Link to={`/courses/${course.id}`} className="flex-1">
-                  <Button className="w-full">View Details</Button>
-                </Link>
-                {isAdmin && (
-                  <>
-                   
-                    <Button
-                      variant="outline"
-                      className="text-xs whitespace-nowrap"
-                      onClick={() => handleDeleteCourse(course.id)}
-                    >
-                      Delete
-                    </Button>
-                  </>
-                )}
-              </div>
-            </Card>
-          ))}
+                  <div className="text-xs text-muted-foreground">
+                    Duration: {course.duration || "N/A"}
+                  </div>
 
-        {!loading && filteredCourses.length === 0 && (
+                  <div className="flex gap-2">
+                    <Link to={`/courses/${course.id}`} className="flex-1">
+                      <Button className="w-full">View Details</Button>
+                    </Link>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="text-xs whitespace-nowrap"
+                          onClick={() => handleDeleteCourse(course.id)}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+
+        {!(isAdmin ? adminLoading : loading) && filteredCourses.length === 0 && (
           <Card className="p-12 text-center col-span-full">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-lg font-semibold mb-2">No courses found</h3>

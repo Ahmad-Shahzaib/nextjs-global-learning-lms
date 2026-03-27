@@ -204,7 +204,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container max-w-4xl">
       <Card className="border-border/50 shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl bg-gradient-accent bg-clip-text text-transparent">

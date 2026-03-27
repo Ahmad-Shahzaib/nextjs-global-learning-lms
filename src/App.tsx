@@ -9,6 +9,10 @@ import { EditModeProvider } from "./contexts/EditModeContext";
 import { Suspense, lazy } from "react";
 import { toast } from "sonner";
 import { Button } from "./components/ui/button";
+import Studentlist from "./pages/Studentlist";
+import InstructorList from "./pages/InstructorList";
+import CategoryList from "./pages/CategoryList";
+import AllStaff from "./pages/AllStaff";
 
 // Lazy load components for better performance
 const Auth = lazy(() => import("./pages/Auth"));
@@ -31,6 +35,21 @@ const Transcript = lazy(() => import("./pages/Transcript"));
 const Softwares = lazy(() => import("./pages/Softwares"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Support = lazy(() => import("./pages/Support"));
+const Comment = lazy(() => import("./pages/Comment"));
+const NotParticipated = lazy(() => import("./pages/NotParticipated"));
+const Achievements = lazy(() => import("./pages/Achievements"));
+const CompletionCertificates = lazy(() => import("./pages/CompletionCertificates"));
+const PerformanceCertificates = lazy(() => import("./pages/PerformanceCertificates"));
+const FinancialSummary = lazy(() => import("./pages/FinancialSummary"));
+const Payouts = lazy(() => import("./pages/Payouts"));
+const ChargeAccounts = lazy(() => import("./pages/ChargeAccounts"));
+const SupportNew = lazy(() => import("./pages/SupportNew"));
+const CourseSupport = lazy(() => import("./pages/CourseSupport"));
+const Ticket = lazy(() => import("./pages/Ticket"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const ELibrary = lazy(() => import("./pages/ELibrary"));
+const InstallmentsList = lazy(() => import("./pages/InstallmentsList"));
+const Settings = lazy(() => import("./pages/Settings"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -144,8 +163,29 @@ const App = () => (
                   
                   <Route path="/blocked" element={<Blocked />} />
                   
-                  {/* Protected dashboard routes */}
+                  {/* Role-based dashboard routes */}
                   <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Dashboard />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/dashboard" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <Dashboard />
+                      </DashboardLayout>
+                    </AdminRoute>
+                  } />
+                  <Route path="/teacher/dashboard" element={
+                    <TeacherOrAdminRoute>
+                      <DashboardLayout>
+                        <Dashboard />
+                      </DashboardLayout>
+                    </TeacherOrAdminRoute>
+                  } />
+                  <Route path="/student/dashboard" element={
                     <ProtectedRoute>
                       <DashboardLayout>
                         <Dashboard />
@@ -171,6 +211,126 @@ const App = () => (
                     <ProtectedRoute>
                       <DashboardLayout>
                         <Assignments />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/comment" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Comment />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/not-participated" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <NotParticipated />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/achievements" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Achievements />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/completion-certificates" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <CompletionCertificates />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/performance-certificates" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <PerformanceCertificates />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/financial-summary" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <FinancialSummary />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/payouts" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Payouts />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/charge-accounts" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ChargeAccounts />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/new" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <SupportNew />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/course-support" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <CourseSupport />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/ticket" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Ticket />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/notifications" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Notifications />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/e-library" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <ELibrary />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/list" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <InstallmentsList />
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <DashboardLayout>
+                        <Settings />
                       </DashboardLayout>
                     </ProtectedRoute>
                   } />
@@ -266,12 +426,41 @@ const App = () => (
                   } />
                   
                   {/* Admin-only routes */}
+                  <Route path="/admin-category" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <CategoryList />
+                      </DashboardLayout>
+                    </AdminRoute>
+                  } />
+                  <Route path="/instructor" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <InstructorList />
+                      </DashboardLayout>
+                    </AdminRoute>
+                  } />
                   <Route path="/users" element={
                     <UsersRoute>
                       <DashboardLayout>
                         <Users />
                       </DashboardLayout>
                     </UsersRoute>
+                  } />
+                  {/* students  */}
+                  <Route path="/students" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <Studentlist/>
+                      </DashboardLayout>
+                    </AdminRoute>
+                  } />
+                  <Route path="/staff" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <AllStaff />
+                      </DashboardLayout>
+                    </AdminRoute>
                   } />
                   
                   <Route path="/submissions" element={

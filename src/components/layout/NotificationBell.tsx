@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,77 +9,50 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
-import { apiFetch } from "@/lib/api";
 
-interface Notification {
-  id: string;
-  type: "assignment" | "deadline" | "announcement";
-  title: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-}
+import { useAppDispatch, useAppSelector } from "@/store/redux/hooks";
+import { fetchNotifications } from "@/store/redux/thunks/notificationsThunk";
+import { useState } from "react";
+
+
 
 export function NotificationBell() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const dispatch = useAppDispatch();
+  // Define a type for notificationsRaw to handle both array and paginated object
+  type Notification = {
+    id: string | number;
+    title: string;
+    message: string;
+    created_at: string | number;
+    // add other fields as needed
+  };
+  type NotificationsRaw = Notification[] | { data: Notification[] };
 
-  useEffect(() => {
-    if (user) {
-      loadNotifications();
-    }
-  }, [user]);
+  const { data: notificationsRaw, loading, error } = useAppSelector(
+    (state): { data: NotificationsRaw; loading: boolean; error: string | null } => state.notifications
+  );
+  // notificationsRaw can be either an array or an object with a 'data' array property (pagination structure)
+  const notifications = Array.isArray(notificationsRaw)
+    ? notificationsRaw
+    : Array.isArray((notificationsRaw as { data?: Notification[] })?.data)
+    ? (notificationsRaw as { data: Notification[] }).data
+    : [];
+  const [open, setOpen] = useState(false);
 
-  const loadNotifications = async () => {
-    if (!user) return;
-
-    try {
-      const data = await apiFetch<{ assignments: any[]; quizzes: any[] }>("/feed/upcoming");
-      const notifs: Notification[] = [];
-
-      (data.assignments || []).slice(0, 5).forEach((assignment) => {
-        if (!assignment.due_date && !assignment.custom_deadline) return;
-        const due = assignment.custom_deadline || assignment.due_date;
-        const daysUntil = Math.ceil(
-          (new Date(due).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-        );
-        notifs.push({
-          id: assignment.id,
-          type: "deadline",
-          title: "Assignment Due Soon",
-          message: `${assignment.title} is due in ${daysUntil} day${daysUntil !== 1 ? "s" : ""}`,
-          created_at: assignment.created_at || new Date().toISOString(),
-          read: false,
-        });
-      });
-
-      (data.quizzes || []).slice(0, 3).forEach((quiz) => {
-        if (!quiz.due_date && !quiz.custom_deadline) return;
-        const due = quiz.custom_deadline || quiz.due_date;
-        const daysUntil = Math.ceil(
-          (new Date(due).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-        );
-        notifs.push({
-          id: `quiz-${quiz.id}`,
-          type: "deadline",
-          title: "Quiz Due Soon",
-          message: `${quiz.title} is due in ${daysUntil} day${daysUntil !== 1 ? "s" : ""}`,
-          created_at: quiz.created_at || new Date().toISOString(),
-          read: false,
-        });
-      });
-
-      setNotifications(notifs);
-      setUnreadCount(notifs.filter((n) => !n.read).length);
-    } catch (error) {
-      setNotifications([]);
-      setUnreadCount(0);
+  // Only fetch notifications when dropdown is opened
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen && user) {
+      dispatch(fetchNotifications(1));
     }
   };
 
+  // Unread count logic (if needed, e.g. all are unread)
+  const unreadCount = notifications.length; // Adjust if you add read logic
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -106,31 +79,27 @@ export function NotificationBell() {
           )}
         </div>
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              No notifications
-            </div>
+          {loading ? (
+            <div className="p-4 text-center text-muted-foreground">Loading...</div>
+          ) : error ? (
+            <div className="p-4 text-center text-destructive">{error}</div>
+          ) : notifications.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">No notifications</div>
           ) : (
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer ${
-                  !notification.read ? "bg-primary/5" : ""
-                }`}
+                className={
+                  "p-4 border-b last:border-0 hover:bg-muted/50 transition-colors cursor-pointer"
+                }
               >
                 <div className="flex items-start gap-3">
-                  <div className={`mt-1 h-2 w-2 rounded-full ${
-                    notification.type === "deadline" ? "bg-destructive" :
-                    notification.type === "assignment" ? "bg-primary" :
-                    "bg-accent"
-                  }`} />
+                  <div className="mt-1 h-2 w-2 rounded-full bg-accent" />
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium">{notification.title}</p>
+                    <div className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: notification.message }} />
                     <p className="text-xs text-muted-foreground">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(Number(notification.created_at) * 1000), { addSuffix: true })}
                     </p>
                   </div>
                 </div>
@@ -142,3 +111,5 @@ export function NotificationBell() {
     </DropdownMenu>
   );
 }
+
+export default NotificationBell;

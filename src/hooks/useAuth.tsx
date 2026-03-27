@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ApiError, apiFetch, clearAuthToken, getAuthToken, setAuthToken } from "@/lib/api";
+import { useDispatch } from "react-redux";
+import { fetchPurchasedCourses } from "@/store/redux/thunks/PurchasedCoursesThunk";
 
 interface ApiUser {
   id: string;
@@ -42,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [roles, setRoles] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const pathnameRef = useRef(location.pathname);
   const refreshingRef = useRef<Promise<boolean> | null>(null);
@@ -152,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsTeacher(roles.includes("teacher"));
           setRoles(roles);
           cacheSession(apiUser, roles);
-          
+
           if (apiUser.is_blocked) {
             // Keep the blocked session active but force the user to the blocked page.
             setStatus("authenticated");
@@ -165,6 +168,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setStatus("authenticated");
           settled = true;
           clearTimeout(fallbackTimer);
+
+          // Pre-fetch courses for students
+          if (!roles.includes("admin")) {
+            dispatch(fetchPurchasedCourses() as any);
+          }
+
           return true;
         } catch (err: any) {
           const status = err?.status;
@@ -258,10 +267,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setStatus("authenticated");
         }
 
-        // Fire-and-forget refresh to validate token, but don't block login.
-        refresh({ force: true }).catch(() => {
-          /* non-blocking */
-        });
+        // Success! Pre-fetch courses for students if applicable
+        if (payload?.user && !payload.roles?.includes("admin")) {
+          dispatch(fetchPurchasedCourses() as any);
+        }
 
         return true;
       } catch (error) {

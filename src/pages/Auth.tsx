@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
+import logoUrl from  "@/assets/global-logo.png";
+import { useDispatch, useSelector } from "react-redux";
+import { loginThunk } from "@/store/redux/thunks/authThunk";
+import { RootState } from "@/store/redux/store";
 import { useAuth } from "@/hooks/useAuth";
-import { apiFetch } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address").trim().toLowerCase(),
@@ -21,50 +24,68 @@ const rawBase =
   "/";
 const BASENAME = rawBase === "/" ? "" : `/${rawBase.replace(/^\/+|\/+$/g, "")}`;
 
+
 export default function Auth() {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { login: authLogin } = useAuth();
+  const { token, user_id, role, loading, error } = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [formKey, setFormKey] = useState(0);
-  const logoUrl = `${BASENAME || ""}`;
+  const navigatedRef = useRef(false);
+  const emailRef = useRef("");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast.dismiss();
-    setLoading(true);
-    try {
-      const validated = loginSchema.parse({ email, password });
+  // Keep emailRef in sync so we can pass it to authLogin after clearing the field
+  useEffect(() => { emailRef.current = email; }, [email]);
 
-      // Call mock API login endpoint
-      const res = await apiFetch<{ token: string; user: any; roles?: string[] }>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email: validated.email, password: validated.password }),
+  useEffect(() => {
+    if (token && user_id && role && !navigatedRef.current) {
+      navigatedRef.current = true;
+
+      // Bridge Redux auth token into useAuth context (sets localStorage + context user)
+      authLogin(token, {
+        user: { id: String(user_id), email: emailRef.current },
+        roles: [role],
       });
-
-      const success = await login(res.token, { user: res.user, roles: res.roles || [] });
-
-      if (!success) throw new Error("Login failed");
-
-      if (res.user.is_blocked) {
-        toast.error("This account is blocked. Contact an administrator.");
-        setEmail("");
-        setPassword("");
-        setFormKey((prev) => prev + 1);
-        navigate(BASENAME ? `${BASENAME}/blocked` : "/blocked", { replace: true });
-        return;
-      }
 
       toast.success("Login successful!");
       setEmail("");
       setPassword("");
       setFormKey((prev) => prev + 1);
 
-      const target = BASENAME ? `${BASENAME}/dashboard` : "/dashboard";
+      let target = "/dashboard";
+      if (role === "teacher") {
+        target = "/teacher/dashboard";
+      } else if (role === "student") {
+        target = "/student/dashboard";
+      } else if (role === "admin") {
+        target = "/admin/dashboard";
+      }
+      if (BASENAME) {
+        target = `${BASENAME}${target}`;
+      }
+
       navigate(target, { replace: true });
+    }
+  }, [token, user_id, role]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      setFormKey((prev) => prev + 1);
+    }
+  }, [error]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.dismiss();
+    try {
+      const validated = loginSchema.parse({ email, password });
+      await dispatch(
+        loginThunk({ username: validated.email, password: validated.password }) as any
+      );
     } catch (error: any) {
       setFormKey((prev) => prev + 1);
       if (error instanceof z.ZodError) {
@@ -72,8 +93,6 @@ export default function Auth() {
       } else {
         toast.error(error?.message || "Failed to sign in. Please try again.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Menu, X, Search, Settings, User, ChevronLeft, ChevronRight, Edit2, Save, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NotificationBell } from "./NotificationBell";
@@ -21,6 +22,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { GlobalLearningLogoLink } from "@/components/UECampusLogoLink";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logoutThunk } from "@/store/redux/thunks/logoutThunk";
+import type { AppDispatch } from "@/store/redux/store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -29,6 +32,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const dispatch = useDispatch<AppDispatch>();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(!isMobile);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(!isMobile);
   const { isEditMode, toggleEditMode, isAdmin } = useEditMode();
@@ -63,8 +67,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const handleSignOut = async () => {
+    try {
+      await dispatch(logoutThunk()).unwrap();
+      toast.success("Signed out successfully");
+    } catch {
+      // API call failed but session is already cleared in the slice;
+      // still treat it as a successful logout on the client.
+      toast.success("Signed out successfully");
+    }
     await signOut();
-    toast.success("Signed out successfully");
   };
 
   if (loading) {

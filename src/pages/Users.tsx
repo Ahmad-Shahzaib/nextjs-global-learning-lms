@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { createUser, clearCreateError, type UserRole } from "@/store/redux/slices/usersSlice";
+import type { AppDispatch, RootState } from "@/store/redux/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -15,12 +18,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
 import { Switch } from "@/components/ui/switch";
 import * as XLSX from "xlsx";
+import CommonTable, { type ColumnDef } from "@/components/common/CommonTable";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import apiClient from "@/lib/axiosInstance";
 
 const userSchema = z.object({
   email: z.string().email("Invalid email address").trim(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   full_name: z.string().trim().min(1, "Name is required"),
-  role: z.enum(["admin", "teacher", "non_editing_teacher", "student", "accounts"]),
+  role_name: z.enum(["admin", "student", "teacher", "organization", "education"]),
 });
 
 const parseBlockedState = (value: unknown) => {
@@ -49,6 +55,8 @@ interface Cohort {
 export default function Users() {
   const { user, isAdmin, login, refresh } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { creating, createError } = useSelector((state: RootState) => state.users);
   const [users, setUsers] = useState<User[]>([]);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,14 +67,16 @@ export default function Users() {
   const [newPassword, setNewPassword] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState<any[]>([]);
-  const [formData, setFormData] = useState({
-    user_id: "",
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    email: string;
+    password: string;
+    role_name: UserRole;
+  }>({
+    full_name: "",
     email: "",
     password: "",
-    full_name: "",
-    role: "student",
-    course_id: "",
+    role_name: "student",
   });
   const [editFormData, setEditFormData] = useState({
     full_name: "",
@@ -79,40 +89,42 @@ export default function Users() {
     // Page is already admin-protected by routing, so load immediately.
     loadUsers();
     loadCohorts();
-    loadCourses();
   }, [user]);
-
-  const loadCourses = async () => {
-    const paths = ["/courses", "/courses?enrolledOnly=true"];
-    for (const path of paths) {
-      try {
-        const data = await apiFetch<any[]>(path);
-        if (Array.isArray(data)) {
-          setCourses(data);
-          return;
-        }
-      } catch (e) {
-        // try next path
-      }
-    }
-    setCourses([]);
-  };
 
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await apiFetch<any[]>("/users");
-      const usersWithRoles =
-        (Array.isArray(data) ? data : []).map((u) => ({
-          id: u.id,
-          email: u.email,
-          full_name: u.full_name || "",
-          roles: u.roles || [],
-          is_blocked: parseBlockedState(u.is_blocked),
-          user_id: u.user_code || "",
-        })) || [];
-      setUsers(usersWithRoles);
-    } catch (error) {
+      // Fetch all pages from /v2/admin/users/staffs
+      let page = 1;
+      let allStaffs: User[] = [];
+
+      while (true) {
+        const response = await apiClient.get(`/v2/admin/users/staffs?page=${page}`);
+        const payload = response.data;
+
+        if (!payload?.success) {
+          throw new Error(payload?.message || "Failed to load staff users");
+        }
+
+        const pageData: any[] = payload.data?.data ?? [];
+        const mapped: User[] = pageData.map((s: any) => ({
+          id: String(s.id),
+          email: s.email ?? "",
+          full_name: s.full_name ?? "",
+          roles: s.role_name ? [s.role_name] : [],
+          is_blocked: s.status !== "active",
+          user_id: s.id ? String(s.id) : null,
+        }));
+
+        allStaffs = [...allStaffs, ...mapped];
+
+        const lastPage: number = payload.data?.last_page ?? 1;
+        if (page >= lastPage) break;
+        page++;
+      }
+
+      setUsers(allStaffs);
+    } catch (error: any) {
       console.error("Error loading users:", error);
       toast.error(error?.message || "Failed to load users");
       setUsers([]);
@@ -127,30 +139,24 @@ export default function Users() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.user_id) {
-      toast.error("User ID is required");
-      return;
-    }
     try {
       const validated = userSchema.parse(formData);
-      await apiFetch("/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const result = await dispatch(
+        createUser({
+          full_name: validated.full_name,
           email: validated.email,
           password: validated.password,
-          full_name: validated.full_name,
-          role: validated.role,
-          user_id: formData.user_id,
-          course_id: formData.course_id || null,
-        }),
-      });
-      toast.success("User created successfully");
-      setDialogOpen(false);
-      setFormData({ user_id: "", email: "", password: "", full_name: "", role: "student", course_id: "" });
-      loadUsers();
+          role_name: validated.role_name,
+        })
+      );
+      if (createUser.fulfilled.match(result)) {
+        toast.success("User created successfully");
+        setDialogOpen(false);
+        setFormData({ full_name: "", email: "", password: "", role_name: "student" });
+        dispatch(clearCreateError());
+      } else {
+        toast.error((result.payload as string) || "Failed to create user");
+      }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
@@ -293,6 +299,128 @@ export default function Users() {
     toast.success("User data exported");
   };
 
+  const userColumns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        header: "#",
+        accessor: (_row, idx) => idx + 1,
+        className: "w-10 text-center text-muted-foreground",
+      },
+      {
+        header: "User",
+        accessor: (u) => (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                {u.full_name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase() || "?"}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{u.full_name}</span>
+                {u.is_blocked && (
+                  <Badge variant="destructive" className="text-xs py-0">
+                    Blocked
+                  </Badge>
+                )}
+              </div>
+              {u.user_id && (
+                <p className="text-xs text-muted-foreground">ID: {u.user_id}</p>
+              )}
+            </div>
+          </div>
+        ),
+      },
+      {
+        header: "Email",
+        accessor: "email",
+        className: "text-muted-foreground",
+      },
+      {
+        header: "Roles",
+        accessor: (u) => (
+          <div className="flex flex-wrap gap-1">
+            {u.roles.map((role) => (
+              <Badge key={role} variant="secondary" className="capitalize">
+                {role}
+              </Badge>
+            ))}
+          </div>
+        ),
+      },
+      {
+        header: "Status",
+        accessor: (u) => (
+          <Badge variant={u.is_blocked ? "destructive" : "default"}>
+            {u.is_blocked ? "Blocked" : "Active"}
+          </Badge>
+        ),
+        className: "w-24",
+      },
+      {
+        header: "Actions",
+        accessor: (u) => (
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleEditUser(u)}
+              title="Edit user"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSelectedUser(u);
+                setPasswordDialogOpen(true);
+              }}
+              title="Reset password"
+            >
+              <Lock className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleToggleBlock(u)}
+              title={u.is_blocked ? "Unblock user" : "Block user"}
+              className={u.is_blocked ? "text-green-600" : "text-orange-600"}
+            >
+              <Ban className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleImpersonate(u)}
+              title="Login as this user"
+              className="text-blue-600"
+            >
+              <LogIn className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDeleteUser(u.id)}
+              className="text-destructive hover:text-destructive"
+              title="Delete user"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+        className: "w-48",
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [users]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -316,111 +444,6 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
-            User Management
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage users, roles, and cohorts
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
-              </DialogHeader>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="user_id">User ID *</Label>
-                <Input
-                  id="user_id"
-                  value={formData.user_id}
-                  onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                  placeholder="e.g., 001, 002"
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Unique identifier (alphanumeric). Once assigned, cannot be changed or reused.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <Input
-                  id="full_name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="teacher">Teacher</SelectItem>
-                    <SelectItem value="non_editing_teacher">Non-editing Teacher</SelectItem>
-                    <SelectItem value="accounts">Accounts</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="course">Enroll in Course (Optional)</Label>
-                <Select value={formData.course_id} onValueChange={(value) => setFormData({ ...formData, course_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={courses.length === 0 ? "No courses found" : "Select a course"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courses.map(course => (
-                      <SelectItem key={course.id} value={course.id}>
-                        {course.code} - {course.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full">Create User</Button>
-            </form>
-          </DialogContent>
-          </Dialog>
-          <Button variant="outline" className="gap-2" onClick={handleExportUsers}>
-            <Download className="h-4 w-4" />
-            Export Excel
-          </Button>
-        </div>
-      </div>
-
       {/* Edit User Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -532,31 +555,44 @@ export default function Users() {
         </DialogContent>
       </Dialog>
 
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="cohorts">Cohorts</TabsTrigger>
-        </TabsList>
+      <div>
+        <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
+          User Management
+        </h1>
+        <p className="text-muted-foreground mt-1">Manage users, roles, and cohorts</p>
+      </div>
 
-        <TabsContent value="users" className="space-y-4">
+      <Card>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-4">
+          <CardTitle className="text-lg font-semibold">
+            Users{" "}
+            {users.length > 0 && (
+              <span className="text-sm font-normal text-muted-foreground">
+                ({users.length} total)
+              </span>
+            )}
+          </CardTitle>
+
           <div className="flex flex-wrap gap-2 items-center">
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search users by name, email, or ID"
-              className="max-w-xs"
+              onKeyDown={(e) => e.key === "Enter" && setSearchQuery(searchInput.trim())}
+              placeholder="Search by name, email or ID"
+              className="w-64"
             />
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setSearchQuery(searchInput.trim())}
-              className="gap-2"
             >
-              <Search className="h-4 w-4" />
+              <Search className="h-4 w-4 mr-1" />
               Search
             </Button>
             {searchQuery && (
               <Button
                 variant="ghost"
+                size="sm"
                 onClick={() => {
                   setSearchInput("");
                   setSearchQuery("");
@@ -565,108 +601,116 @@ export default function Users() {
                 Clear
               </Button>
             )}
-          </div>
-          <div className="grid gap-4">
-            {filteredUsers.map((user) => (
-              <Card key={user.id} className="border-border/50">
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <UsersIcon className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{user.full_name}</h3>
-                          {user.is_blocked && (
-                            <Badge variant="destructive" className="text-xs">
-                              Blocked
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        {user.user_id && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            ID: {user.user_id}
-                          </p>
-                        )}
-                        <div className="flex gap-2 mt-2">
-                          {user.roles.map((role) => (
-                            <Badge key={role} variant="secondary">
-                              {role}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 flex-wrap sm:flex-nowrap sm:gap-2 w-full sm:w-auto">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditUser(user)}
-                        title="Edit user"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setPasswordDialogOpen(true);
-                        }}
-                        title="Reset password"
-                      >
-                        <Lock className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleToggleBlock(user)}
-                        title={user.is_blocked ? "Unblock user" : "Block user"}
-                        className={user.is_blocked ? "text-green-600" : "text-orange-600"}
-                      >
-                        <Ban className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleImpersonate(user)}
-                        title="Login as this user"
-                        className="text-blue-600"
-                      >
-                        <LogIn className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteUser(user.id)}
-                        className="text-destructive hover:text-destructive"
-                        title="Delete user"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="full_name">Full Name</Label>
+                    <Input
+                      id="full_name"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      placeholder="e.g., John Doe"
+                      required
+                    />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Min 6 characters"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role_name">Role</Label>
+                    <Select
+                      value={formData.role_name}
+                      onValueChange={(value) => setFormData({ ...formData, role_name: value as UserRole })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="teacher">Teacher</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="organization">Organization</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {createError && (
+                    <p className="text-sm text-destructive">{createError}</p>
+                  )}
+                  <Button type="submit" className="w-full" disabled={creating}>
+                    {creating ? "Creating..." : "Create User"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" size="sm" className="gap-2" onClick={handleExportUsers}>
+              <Download className="h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <Tabs defaultValue="users" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="cohorts">Cohorts</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="users">
+              <CommonTable<User>
+                columns={userColumns}
+                data={filteredUsers}
+                loading={loading}
+                skeletonRows={6}
+                emptyMessage="No users found."
+                rowKey={(u) => u.id}
+              />
+            </TabsContent>
+
+            <TabsContent value="cohorts" className="space-y-4">
+              <Card className="border-border/50">
+                <CardHeader>
+                  <CardTitle className="text-lg">Cohort Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Cohort management features coming soon. You'll be able to create cohorts and automatically enroll groups of users.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="cohorts" className="space-y-4">
-          <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle className="text-lg">Cohort Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Cohort management features coming soon. You'll be able to create cohorts and automatically enroll groups of users.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }
