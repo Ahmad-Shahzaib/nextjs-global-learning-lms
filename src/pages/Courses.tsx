@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { BookOpen, Search, Plus, Copy, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchPurchasedCourses } from "@/store/redux/thunks/PurchasedCoursesThunk";
 import { RootState } from "@/store/redux/store";
@@ -35,6 +36,7 @@ import { PurchasedCourse } from "@/store/purchasedCourses/types";
 
 export default function Courses() {
   const { user, isAdmin } = useAuth();
+  const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { items: purchasedCourses, loading, error } = useSelector((state: RootState) => state.purchasedCourses);
   // Only used for admin
@@ -81,6 +83,15 @@ export default function Courses() {
       }
     }
     return [];
+  }
+
+  async function fetchCourseDetail(courseId: string | number) {
+    if (!courseId) return null;
+    const data = await apiFetch<any>(`/v2/panel/webinars/${courseId}`);
+    if (data && typeof data === "object" && "success" in data) {
+      return Array.isArray(data.data) ? data.data[0] || null : data.data;
+    }
+    return data;
   }
 
   async function fetchCatalog(): Promise<PurchasedCourse[]> {
@@ -352,7 +363,18 @@ export default function Courses() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Link to={`/courses/${course.id}`} className="flex-1">
+                    <Link
+                      to={`/courses/${course.id}`}
+                      className="flex-1"
+                      onMouseEnter={() =>
+                        queryClient.prefetchQuery({
+                          queryKey: ["courseDetail", course.id, user?.id],
+                          queryFn: () => fetchCourseDetail(course.id),
+                          staleTime: 15 * 60 * 1000,
+                          retry: 1,
+                        })
+                      }
+                    >
                       <Button className="w-full">View Details</Button>
                     </Link>
                     {isAdmin && (

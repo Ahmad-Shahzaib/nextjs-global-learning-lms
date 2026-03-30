@@ -32,6 +32,7 @@ export function StudentCourseDetail() {
 
   const [readToggles, setReadToggles] = useState<Record<string, boolean>>({});
   const [selectedItem, setSelectedItem] = useState<{ sectionId: string; itemIdx: number } | null>(null);
+  const [selectedAssessmentSectionId, setSelectedAssessmentSectionId] = useState<string | null>(null);
   const [panel, setPanel] = useState<"content" | "assessment" | "certificates">("content");
 
   const { data: courseData, isLoading: loading, error: queryError } = useQuery({
@@ -119,7 +120,10 @@ export function StudentCourseDetail() {
       return { course: data, sections: normalizedSections };
     },
     enabled: !!courseId && user !== undefined,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 15 * 60 * 1000, // Cache for 15 minutes
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   const course = courseData?.course || null;
@@ -129,13 +133,21 @@ export function StudentCourseDetail() {
   const [sections, setSections] = useState<any[]>([]);
 
   useEffect(() => {
-    if (rawSections.length > 0 && sections.length === 0) {
-      setSections(rawSections);
-      if (rawSections[0]?.items?.length) {
-        setSelectedItem({ sectionId: rawSections[0].id, itemIdx: 0 });
-      }
+    if (!courseId) return;
+
+    if (rawSections.length === 0) {
+      setSections([]);
+      setSelectedItem(null);
+      setSelectedAssessmentSectionId(null);
+      setReadToggles({});
+      return;
     }
-  }, [rawSections]);
+
+    setSections(rawSections);
+    setReadToggles({});
+    setSelectedAssessmentSectionId(null);
+    setSelectedItem({ sectionId: rawSections[0].id, itemIdx: 0 });
+  }, [courseId, rawSections]);
 
   const error = queryError ? (queryError as Error).message : null;
 
@@ -162,8 +174,28 @@ export function StudentCourseDetail() {
     return cleaned.split("?")[0].split("#")[0];
   };
 
+  const getAssessmentItems = (section: any) =>
+    (section?.items || []).filter((item: any) => item.icon === "quiz" || item.icon === "file");
+
+  const courseHasCertificate = Boolean(
+    course?.certificate !== undefined &&
+    String(course.certificate).toLowerCase() !== "0" &&
+    String(course.certificate).toLowerCase() !== "false"
+  );
+
+  const courseCertificateEnabledQuizzes =
+    Array.isArray(course?.quizzes) && course.quizzes.length > 0
+      ? course.quizzes.filter((quiz: any) =>
+          Boolean(quiz?.certificate) &&
+          String(quiz.certificate).toLowerCase() !== "0" &&
+          String(quiz.certificate).toLowerCase() !== "false"
+        )
+      : [];
+
+  const courseCertificateStatus = courseProgress >= 100 ? "Completed" : "In Progress";
+
   const buildFileUrl = (source: any) => {
-    let filePath =
+    const filePath =
       source?.file ||
       source?.file_path ||
       source?.link_url ||
@@ -203,6 +235,14 @@ export function StudentCourseDetail() {
   const currentItem = useMemo(() =>
     currentSection?.items?.[selectedItem?.itemIdx ?? 0] || null
     , [currentSection, selectedItem?.itemIdx]);
+
+  const assessmentSelectedSection = useMemo(
+    () => sections.find((s) => s.id === selectedAssessmentSectionId) || null,
+    [sections, selectedAssessmentSectionId]
+  );
+
+  const assessmentSelectedItems = getAssessmentItems(assessmentSelectedSection);
+  const assessmentNoItemsSelected = panel === "assessment" && selectedAssessmentSectionId && assessmentSelectedItems.length === 0;
 
   const tabs = useMemo(() => [
     { key: "content" as const, label: "Content", Icon: LayoutGrid },
@@ -270,6 +310,14 @@ export function StudentCourseDetail() {
 
           <div className="flex-1 overflow-hidden bg-white">
             {(() => {
+              if (assessmentNoItemsSelected) {
+                return (
+                  <div className="h-full flex items-center justify-center text-slate-500">
+                    No assessment items in this chapter.
+                  </div>
+                );
+              }
+
               if (!currentItem) {
                 return (
                   <div className="h-full flex items-center justify-center text-slate-500">
@@ -280,19 +328,23 @@ export function StudentCourseDetail() {
 
               if (currentItem.icon === "text") {
                 return (
-                  <div className="h-full p-8 overflow-y-auto">
-                    <h2 className="text-2xl font-bold mb-2">{currentItem.title}</h2>
-                    {currentItem.subtitle && currentItem.subtitle !== "Text lesson" && (
-                      <p className="text-sm text-slate-500 mb-4">{currentItem.subtitle}</p>
-                    )}
-                    {currentItem.textContent ? (
-                      <div
-                        className="prose prose-slate max-w-none"
-                        dangerouslySetInnerHTML={{ __html: currentItem.textContent }}
-                      />
-                    ) : (
-                      <p className="text-slate-400">No content available for this lesson.</p>
-                    )}
+                  <div className="h-full p-3 overflow-y-auto bg-gradient-to-br from-white to-slate-100">
+                    <div className="mx-auto max-w-6xl rounded-2xl bg-white p-6 shadow-lg ring-1 ring-slate-200">
+                      <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{currentItem.title}</h2>
+                      {currentItem.subtitle && currentItem.subtitle !== "Text lesson" && (
+                        <p className="text-sm md:text-base text-slate-500 mb-4">{currentItem.subtitle}</p>
+                      )}
+
+                      {currentItem.textContent ? (
+                        <article className="prose prose-slate prose-lg max-w-none text-slate-700 break-words prose-headings:font-semibold prose-headings:text-slate-900 prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:text-indigo-800 prose-blockquote:border-l-4 prose-blockquote:border-indigo-100 prose-blockquote:bg-indigo-50 prose-blockquote:text-indigo-800 prose-ol:list-decimal prose-ul:list-disc prose-img:rounded-xl prose-img:shadow-sm prose-table:table-auto prose-table:border prose-table:border-slate-200 prose-table:rounded-lg prose-table:px-2 prose-table:py-1">
+                          <div dangerouslySetInnerHTML={{ __html: currentItem.textContent }} />
+                        </article>
+                      ) : (
+                        <div className="text-center py-12">
+                          <p className="text-sm text-slate-400">No content available for this lesson.</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               }
@@ -359,24 +411,60 @@ export function StudentCourseDetail() {
               }
 
               if (currentItem.icon === "quiz") {
+                const quizData = currentItem.quizData || {};
+                const quizQuestions = quizData.quiz_questions || quizData.questions || [];
+                const quizResults = quizData.quiz_results || [];
+
                 return (
-                  <div className="h-full p-6">
+                  <div className="h-full p-6 overflow-y-auto">
                     <h2 className="text-2xl font-bold mb-2">{currentItem.title}</h2>
                     {currentItem.subtitle && (
                       <p className="text-sm text-slate-500 mb-4">{currentItem.subtitle}</p>
                     )}
-                    {currentItem.quizUrl ? (
-                      <a
-                        href={currentItem.quizUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        Start quiz
-                      </a>
-                    ) : (
-                      <p className="text-slate-500">No direct quiz link available yet.</p>
-                    )}
+
+              
+
+                    <div className="mt-6 space-y-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-800">Quiz Questions</h3>
+                        {quizQuestions.length > 0 ? (
+                          <ul className="mt-2 list-disc list-inside text-sm text-slate-600">
+                            {quizQuestions.map((qq: any, qIdx: number) => (
+                              <li key={qq.id ?? qIdx} className="mb-1">
+                                <strong>{qq.title || qq.description || `Question ${qIdx + 1}`}</strong>
+                                {qq.description && <p className="text-xs text-slate-500">{qq.description}</p>}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-400 mt-2">No quiz questions available yet.</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-800">Quiz Results</h3>
+                        {quizResults.length > 0 ? (
+                          <ul className="mt-2 space-y-2 text-sm text-slate-600">
+                            {quizResults.map((qr: any, rIdx: number) => (
+                              <li key={qr.id ?? rIdx} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                                <p><strong>Attempt:</strong> {qr.attempt ?? rIdx + 1}</p>
+                                <p><strong>Score:</strong> {qr.user_grade ?? qr.results ?? "N/A"}</p>
+                                {qr.status && <p><strong>Status:</strong> {qr.status}</p>}
+                                {qr.feedback && <p className="text-xs text-slate-500">{qr.feedback}</p>}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-xs text-slate-400 mt-2">No quiz results available yet.</p>
+                        )}
+                      </div>
+
+                      {quizQuestions.length === 0 && quizResults.length === 0 && (
+                        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 text-sm text-slate-500">
+                          No quiz question or result data is available for this quiz yet.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               }
@@ -451,7 +539,10 @@ export function StudentCourseDetail() {
                               ? "bg-orange-50 border-l-4 border-orange-500"
                               : "hover:bg-slate-100"
                           )}
-                          onClick={() => setSelectedItem({ sectionId: section.id, itemIdx: idx })}
+                          onClick={() => {
+                            setSelectedAssessmentSectionId(null);
+                            setSelectedItem({ sectionId: section.id, itemIdx: idx });
+                          }}
                         >
                           <div className="flex items-start gap-3">
                             <ItemIcon type={item.icon} />
@@ -495,10 +586,23 @@ export function StudentCourseDetail() {
                 ) : (
                   sections.map((section, sectionIndex) => {
                     const chapterTitle = section.title || section.name || `Chapter ${sectionIndex + 1}`;
-                    const assessmentItems = (section.items || []).filter((item: any) => item.icon === "quiz" || item.icon === "file");
+                    const assessmentItems = getAssessmentItems(section);
+
+                    const firstAssessmentIndex = (section.items || []).findIndex((item: any) => item.icon === "quiz" || item.icon === "file");
 
                     return (
-                      <div key={section.id || sectionIndex} className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+                      <div
+                        key={section.id || sectionIndex}
+                        className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 cursor-pointer"
+                        onClick={() => {
+                          setSelectedAssessmentSectionId(section.id || null);
+                          if (firstAssessmentIndex >= 0) {
+                            setSelectedItem({ sectionId: section.id, itemIdx: firstAssessmentIndex });
+                          } else {
+                            setSelectedItem(null);
+                          }
+                        }}
+                      >
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <h3 className="text-sm font-semibold text-slate-900">Chapter {sectionIndex + 1}: {chapterTitle}</h3>
@@ -508,11 +612,24 @@ export function StudentCourseDetail() {
 
                         {assessmentItems.length > 0 ? (
                           <ul className="mt-3 space-y-1 text-xs text-slate-600">
-                            {assessmentItems.map((item: any, idx: number) => (
-                              <li key={item.id || idx}>
-                                {item.title || item.name || "Assessment item"} ({item.icon})
-                              </li>
-                            ))}
+                            {assessmentItems.map((item: any, idx: number) => {
+                              const absoluteItemIndex = (section.items || []).findIndex((i: any) => i === item);
+                              const isActive = selectedItem?.sectionId === section.id && selectedItem?.itemIdx === absoluteItemIndex;
+
+                              return (
+                                <li
+                                  key={item.id || idx}
+                                  className={cn("cursor-pointer px-2 py-1 rounded", isActive ? "bg-orange-50 text-orange-700" : "hover:bg-slate-100")}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setSelectedAssessmentSectionId(section.id || null);
+                                    setSelectedItem({ sectionId: section.id, itemIdx: absoluteItemIndex });
+                                  }}
+                                >
+                                  {item.title || item.name || "Assessment item"} ({item.icon})
+                                </li>
+                              );
+                            })}
                           </ul>
                         ) : (
                           <p className="mt-3 text-xs text-slate-400">No assessment items in this chapter.</p>
@@ -526,7 +643,71 @@ export function StudentCourseDetail() {
 
             {panel === "certificates" && (
               <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-4 py-6">
-                <p className="text-xs text-slate-400">No certificates yet.</p>
+                {!courseHasCertificate ? (
+                  <div className="text-center py-12">
+                    <h3 className="text-lg font-semibold text-slate-800">No Certificate!</h3>
+                    <p className="text-sm text-slate-500 mt-2">This course doesn't include any certificates.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-900">Certificate details</h3>
+                      <p className="text-xs text-slate-500">Data from course API is shown here dynamically.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 text-xs text-slate-600">
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Course certificate setting</span>
+                          <span className="font-semibold text-emerald-600">Enabled</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1">course.certificate: {course?.certificate ?? "n/a"}</p>
+                      </div>
+
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Progress</span>
+                          <span className="font-semibold">{courseProgress}%</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1">Certificate status: {courseCertificateStatus}</p>
+                      </div>
+
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">Quiz certificates</span>
+                          <span className="font-semibold">{courseCertificateEnabledQuizzes.length}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          {courseCertificateEnabledQuizzes.length > 0
+                            ? courseCertificateEnabledQuizzes.map((quiz: any) => quiz.title || `Quiz ${quiz.id}`).join(", ")
+                            : "No quiz certificates configured."
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-100 bg-white p-3">
+                      <p className="text-sm font-semibold text-slate-800">Course certificate available</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {courseCertificateStatus === "Completed"
+                          ? "You have completed this course and are eligible for a certificate."
+                          : "Complete all lessons to generate a certificate."
+                        }
+                      </p>
+                      {courseCertificateStatus === "Completed" && (
+                        <Button
+                          size="sm"
+                          className="mt-3"
+                          onClick={() => {
+                            window.open("/certificates", "_blank");
+                          }}
+                        >
+                          View your certificate
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
