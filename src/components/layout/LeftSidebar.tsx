@@ -36,9 +36,9 @@ const topNavigationItems = [
     submenu: [
       { label: "My Purchased", href: "/courses" },
       { label: "My Commenet", href: "/comment" },
-  
-    ]
-   },
+    ],
+  },
+  { icon: BookOpen, label: "All Courses", href: "/courses/all", allowAdmin: true },
 ];
 
 /* ================= STUDENT ================= */
@@ -122,6 +122,16 @@ export function LeftSidebar() {
   const [adminUsersOpen, setAdminUsersOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
+  const isStudent = !isAdmin && !isAccounts && !isTeacher;
+  const topMenuItems = isAdmin
+    ? topNavigationItems.filter((item) => item.label === "Dashboard" || item.label === "All Courses")
+    : topNavigationItems.filter((item) => item.label !== "All Courses");
+  const bottomMenuItems = isAdmin
+    ? bottomNavigationItems
+    : isTeacher
+    ? bottomNavigationItems.filter((item) => item.allowTeacher)
+    : [];
+
   useEffect(() => {
     if (user) {
       setUserName(user.full_name || "Student");
@@ -161,7 +171,7 @@ export function LeftSidebar() {
       </div>
 
       {/* ===== TOP ===== */}
-      {topNavigationItems.map((item) => {
+      {topMenuItems.map((item) => {
         const isOpen = openMenus[item.label];
 
         if (!item.submenu) {
@@ -242,7 +252,7 @@ export function LeftSidebar() {
       )}
 
       {/* ===== STUDENT MENU ===== */}
-      {!isAdmin &&
+      {isStudent &&
         studentNavigationItems.map((item) => {
           const isOpen = openMenus[item.label];
 
@@ -288,9 +298,9 @@ export function LeftSidebar() {
           );
         })}
 
-      {/* ===== ADMIN MENU ===== */}
-      {isAdmin &&
-        bottomNavigationItems.map((item) => (
+      {/* ===== ADMIN/TEACHER MENU ===== */}
+      {(isAdmin || isTeacher) &&
+        bottomMenuItems.map((item) => (
           <NavLink key={item.href} to={item.href} className="flex items-center gap-3 px-4 py-3">
             <item.icon className="h-5 w-5" />
             {item.label}

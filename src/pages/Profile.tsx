@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,13 +10,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Loader2, Upload, User } from "lucide-react";
 import { apiFetch, resolveStorageUrl } from "@/lib/api";
+import { AppDispatch, RootState } from "@/store/redux/store";
+import { fetchProfileSetting, updateProfileSetting } from "@/store/redux/thunks/profileThunk";
 
 export default function Profile() {
+  const dispatch = useDispatch<AppDispatch>();
   const { user, isAdmin } = useAuth();
+  const profile = useSelector((state: RootState) => state.profile.user);
+  const profileLoading = useSelector((state: RootState) => state.profile.loading);
+  const profileError = useSelector((state: RootState) => state.profile.error);
+  const profileUpdating = useSelector((state: RootState) => state.profile.updating);
+  const profileUpdateError = useSelector((state: RootState) => state.profile.updateError);
+
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [idUploading, setIdUploading] = useState(false);
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+  const [timezone, setTimezone] = useState("UTC");
+  const [language, setLanguage] = useState("en");
+  const [newsletter, setNewsletter] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [userId, setUserId] = useState("");
   const [idDocumentUrl, setIdDocumentUrl] = useState("");
@@ -36,10 +51,40 @@ export default function Profile() {
   );
 
   useEffect(() => {
-    if (user) {
-      loadProfile();
+    dispatch(fetchProfileSetting());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setEmail(profile.email || user?.email || "");
+      setBio(profile.bio || "");
+      setTimezone(profile.timezone || "UTC");
+      setLanguage(profile.language || "en");
+      setNewsletter(Boolean(profile.newsletter));
+      setAvatarUrl(profile.avatar || "");
+      setIdDocumentUrl(profile.identity_scan || "");
+      setUserId(String(profile.id || ""));
+    } else if (user) {
+      // Fallback for context-backed auth before profile loads
+      setFullName(user.full_name || "");
+      setEmail(user.email || "");
+      setAvatarUrl((user as any).avatar_url || "");
+      setUserId((user as any).user_code || "Not assigned");
     }
-  }, [user]);
+  }, [profile, user]);
+
+  useEffect(() => {
+    if (profileError) {
+      toast.error(profileError);
+    }
+  }, [profileError]);
+
+  useEffect(() => {
+    if (profileUpdateError) {
+      toast.error(profileUpdateError);
+    }
+  }, [profileUpdateError]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -156,16 +201,28 @@ export default function Profile() {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-
-      await apiFetch("/profile", {
-        method: "PATCH",
-        body: JSON.stringify({ full_name: fullName }),
-      });
-
+      const payload = {
+        full_name: fullName,
+        email,
+        bio,
+        timezone,
+        language,
+        newsletter,
+      };
+      const result = await dispatch(updateProfileSetting(payload)).unwrap();
+      setFullName(result.full_name || fullName);
+      setEmail(result.email || email);
+      setBio(result.bio || bio);
+      setTimezone(result.timezone || timezone);
+      setLanguage(result.language || language);
+      setNewsletter(result.newsletter ?? newsletter);
+      setAvatarUrl(result.avatar || avatarUrl);
+      setIdDocumentUrl(result.identity_scan || idDocumentUrl);
+      setUserId(String(result.id || userId));
       toast.success("Profile updated successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      toast.error(error?.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }
@@ -278,12 +335,12 @@ export default function Profile() {
               <Input
                 id="email"
                 type="email"
-                value={user.email || ""}
-                disabled
-                className="bg-muted/50"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
               />
               <p className="text-xs text-muted-foreground">
-                Email cannot be changed. Contact administrator if needed.
+                You can edit your email address here.
               </p>
             </div>
 
@@ -299,6 +356,64 @@ export default function Profile() {
               <p className="text-xs text-muted-foreground">
                 You can edit your name.
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Input
+                id="bio"
+                type="text"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell us about yourself"
+              />
+              <p className="text-xs text-muted-foreground">
+                A short biography shown on your profile.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <select
+                  id="timezone"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  className="w-full rounded-md border px-3 py-2"
+                >
+                  <option value="UTC">UTC</option>
+                  <option value="GMT">GMT</option>
+                  <option value="EST">EST</option>
+                  <option value="PST">PST</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="language">Language</Label>
+                <select
+                  id="language"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full rounded-md border px-3 py-2"
+                >
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                  <option value="fr">French</option>
+                  <option value="de">German</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="newsletter">Newsletter</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="newsletter"
+                    type="checkbox"
+                    checked={newsletter}
+                    onChange={(e) => setNewsletter(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-xs">Subscribe to updates</span>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -408,7 +523,7 @@ export default function Profile() {
           <div className="flex justify-end">
             <Button
               onClick={handleSaveProfile}
-              disabled={loading}
+              disabled={loading || profileUpdating}
               className="min-w-32"
             >
               {loading ? (

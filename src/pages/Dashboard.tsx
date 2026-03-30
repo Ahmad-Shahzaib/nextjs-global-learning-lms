@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Clock, PlayCircle, CheckCircle2, AlertCircle, Trash2, Copy, Edit2, Users, ShoppingCart, TicketCheck } from "lucide-react";
+import { BookOpen, Clock, PlayCircle, CheckCircle2, AlertCircle, Trash2, Copy, Edit2, Users, ShoppingCart, TicketCheck, Wallet, MessageCircle, CalendarCheck2, MessageSquare } from "lucide-react";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import LMSGuides from "@/components/LMSGuides";
 import { useState, useEffect } from "react";
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "@/store/redux/hooks";
 import { fetchAdminDashboardStats } from "@/store/redux/thunks/adminDashboardThunk";
+import { fetchUserDashboardInfo } from "@/store/redux/thunks/userDashboardThunk";
 
 interface Course {
   id: string;
@@ -32,6 +33,9 @@ export default function Dashboard() {
   const { counts: adminCounts, loading: adminLoading, error: adminError } = useAppSelector(
     (state) => state.adminDashboard
   );
+  const { data: userDashboard, loading: userLoading, error: userError } = useAppSelector(
+    (state) => state.userDashboard
+  );
   const [courses, setCourses] = useState<Course[]>([]);
   const [stats, setStats] = useState({
     totalActivity: 0,
@@ -48,46 +52,35 @@ export default function Dashboard() {
   useEffect(() => {
     if (isAdmin) {
       dispatch(fetchAdminDashboardStats());
+    } else if (user) {
+      dispatch(fetchUserDashboardInfo());
     }
-  }, [isAdmin, dispatch]);
+  }, [isAdmin, user, dispatch]);
 
   useEffect(() => {
-    if (user) {
-      // UI-only demo data (no backend)
-      const sampleCourses: Course[] = [
-        { id: "c1", title: "Introduction to Biology", code: "BIO101", progress: 42, instructor: "Dr. A", next_class: null, grade: null },
-        { id: "c2", title: "Calculus I", code: "MATH101", progress: 75, instructor: "Prof. B", next_class: null, grade: null },
-        { id: "c3", title: "Intro to Programming", code: "CS101", progress: 18, instructor: "Ms. C", next_class: null, grade: null },
-      ];
-      // Sample assignments (static UI-only)
-      const sampleAssignments = [
-        { id: "a1", title: "Essay on Cell Structure", points: 100, attempts: 1, due_date: "2026-02-20" },
-        { id: "a2", title: "Calculus Problem Set 1", points: 50, attempts: 3, due_date: "2026-02-22" },
-        { id: "a3", title: "Programming: Hello World Project", points: 20, attempts: 2, due_date: "2026-02-25" },
-      ];
-
-      // Sample quizzes (static UI-only)
-      const sampleQuizzes = [
-        { id: "q1", title: "Biology Basics Quiz", duration: 30, due_date: "2026-02-18" },
-        { id: "q2", title: "Limits & Continuity Quiz", duration: 20, due_date: "2026-02-21" },
-        { id: "q3", title: "Intro to JS Quiz", duration: 15, due_date: "2026-02-23" },
-      ];
-
-      setCourses(sampleCourses);
-      setAssignments(sampleAssignments);
-      setQuizzes(sampleQuizzes);
-
-      // Update simple stats derived from the sample courses
-      const totalCourses = sampleCourses.length;
-      const totalActivity = totalCourses
-        ? Math.round(sampleCourses.reduce((s, c) => s + (c.progress || 0), 0) / totalCourses)
-        : 0;
-      const inProgress = sampleCourses.filter((c) => (c.progress ?? 0) > 0 && (c.progress ?? 0) < 100).length;
-      const completed = sampleCourses.filter((c) => (c.progress ?? 0) >= 100).length;
-      setStats({ totalActivity, inProgress, completed, totalCourses });
+    if (!isAdmin && userDashboard) {
+      // Map API response to UI state for user dashboard
+      // Courses
+      if (Array.isArray(userDashboard.courses)) {
+        setCourses(userDashboard.courses);
+      }
+      // Assignments
+      if (Array.isArray(userDashboard.assignments)) {
+        setAssignments(userDashboard.assignments);
+      }
+      // Quizzes
+      if (Array.isArray(userDashboard.quizzes)) {
+        setQuizzes(userDashboard.quizzes);
+      }
+      // Stats
+      setStats({
+        totalActivity: userDashboard.totalActivity ?? 0,
+        inProgress: userDashboard.inProgress ?? 0,
+        completed: userDashboard.completed ?? 0,
+        totalCourses: userDashboard.totalCourses ?? 0,
+      });
     }
-  }, [user, isPrivileged]);
-  // Removed backend fetches for UI-only build. Data is initialized locally.
+  }, [isAdmin, userDashboard]);
 
   const fetchAssignments = async () => {
     // no-op in UI-only mode
@@ -221,42 +214,58 @@ export default function Dashboard() {
       )}
 
       {/* Student / general stats — hidden for admins */}
-      {!isAdmin && <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6 bg-gradient-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-muted-foreground">Total Activity</h3>
-            <Clock className="h-4 w-4 text-primary" />
-          </div>
-          <div className="text-4xl font-bold">{stats.totalActivity}%</div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-muted-foreground">In Progress</h3>
-            <AlertCircle className="h-4 w-4 text-primary" />
-          </div>
-          <div className="text-4xl font-bold">{stats.inProgress}</div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-muted-foreground">Completed</h3>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </div>
-          <div className="text-4xl font-bold">{stats.completed}</div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm text-muted-foreground">Total Courses</h3>
-            <BookOpen className="h-4 w-4 text-accent" />
-          </div>
-          <div className="text-4xl font-bold">{stats.totalCourses}</div>
-        </Card>
-      </div>}
+      {!isAdmin && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <Card className="p-6 bg-gradient-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm text-muted-foreground">Account Balance</h3>
+              <Wallet className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-4xl font-bold">
+              {userLoading ? "…" : (userDashboard?.balance ?? 0)}
+            </div>
+          </Card>
+          <Card className="p-6 bg-gradient-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm text-muted-foreground">Purchased Courses</h3>
+              <BookOpen className="h-4 w-4 text-accent" />
+            </div>
+            <div className="text-4xl font-bold">
+              {userLoading ? "…" : (userDashboard?.webinarsCount ?? 0)}
+            </div>
+          </Card>
+          <Card className="p-6 bg-gradient-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm text-muted-foreground">Support Messages</h3>
+              <MessageCircle className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-4xl font-bold">
+              {userLoading ? "…" : (userDashboard?.supportsCount ?? 0)}
+            </div>
+          </Card>
+          <Card className="p-6 bg-gradient-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm text-muted-foreground">Meetings</h3>
+              <CalendarCheck2 className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-4xl font-bold">
+              {userLoading ? "…" : (userDashboard?.reserveMeetingsCount ?? 0)}
+            </div>
+          </Card>
+          <Card className="p-6 bg-gradient-card">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm text-muted-foreground">Comments</h3>
+              <MessageSquare className="h-4 w-4 text-primary" />
+            </div>
+            <div className="text-4xl font-bold">
+              {userLoading ? "…" : (userDashboard?.commentsCount ?? 0)}
+            </div>
+          </Card>
+        </div>
+      )}
 
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Enrolled Courses</h2>
+        {/* <h2 className="text-2xl font-bold">Enrolled Courses</h2> */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
             <Card key={course.id} className="p-6 hover:shadow-glow transition-all bg-gradient-card group relative">
@@ -325,45 +334,27 @@ export default function Dashboard() {
           ))}
       </div>
     </div>
-
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Assignments & Quizzes</h2>
-        <div className="flex gap-2">
-          <Button
-            variant={selectedTab === "assignments" ? "secondary" : "outline"}
-            onClick={() =>
-              setSelectedTab((prev) => (prev === "assignments" ? null : "assignments"))
-            }
-          >
-            Assignments
-          </Button>
-          <Button
-            variant={selectedTab === "quizzes" ? "secondary" : "outline"}
-            onClick={() =>
-              setSelectedTab((prev) => (prev === "quizzes" ? null : "quizzes"))
-            }
-          >
-            Quizzes
-          </Button>
+    {/* Noticeboard: show unread_noticeboards as cards */}
+    <div>
+      <h3 className="text-2xl font-bold mb-4">Noticeboard</h3>
+      {Array.isArray(userDashboard?.unread_noticeboards) && userDashboard.unread_noticeboards.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {userDashboard.unread_noticeboards.map((notice: any) => (
+            <Card key={notice.id} className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
+              <h4 className="text-lg font-semibold mb-2">{notice.title}</h4>
+              <p className="text-sm text-muted-foreground mb-1">{notice.message}</p>
+              {notice.created_at && (
+                <span className="text-xs text-gray-500">{new Date(Number(notice.created_at) * 1000).toLocaleString()}</span>
+              )}
+            </Card>
+          ))}
         </div>
-      </div>
-      {selectedTab && (
-        <div className="space-y-3">
-          {selectedTab === "assignments" ? (
-            assignments.length ? (
-              assignments.map((assignment) => renderAssignmentItem(assignment))
-            ) : (
-              <Card className="p-4 text-sm text-muted-foreground">No assignments available.</Card>
-            )
-          ) : quizzes.length ? (
-            quizzes.map((quiz) => renderQuizItem(quiz))
-          ) : (
-            <Card className="p-4 text-sm text-muted-foreground">No quizzes available.</Card>
-          )}
-        </div>
+      ) : (
+        <p className="text-muted-foreground">No unread notices.</p>
       )}
     </div>
+
+    
 
     {/* LMS Guides Section */}
     <div className="space-y-4 mt-8">
