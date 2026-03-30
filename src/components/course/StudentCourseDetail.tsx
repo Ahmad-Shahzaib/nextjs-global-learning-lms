@@ -127,8 +127,8 @@ export function StudentCourseDetail() {
   });
 
   const course = courseData?.course || null;
-  const rawSections = courseData?.sections || [];
-  
+  const rawSections = useMemo(() => courseData?.sections || [], [courseData?.sections]);
+
   // Local state for toggling section open/close (independent of cache)
   const [sections, setSections] = useState<any[]>([]);
 
@@ -143,10 +143,21 @@ export function StudentCourseDetail() {
       return;
     }
 
-    setSections(rawSections);
+    setSections((prev) => {
+      if (prev.length === rawSections.length && prev.every((s, idx) => s.id === rawSections[idx].id && s.open === rawSections[idx].open)) {
+        return prev;
+      }
+      return rawSections;
+    });
+
     setReadToggles({});
     setSelectedAssessmentSectionId(null);
-    setSelectedItem({ sectionId: rawSections[0].id, itemIdx: 0 });
+    setSelectedItem((prev) => {
+      if (prev?.sectionId === rawSections[0].id && prev?.itemIdx === 0) {
+        return prev;
+      }
+      return { sectionId: rawSections[0].id, itemIdx: 0 };
+    });
   }, [courseId, rawSections]);
 
   const error = queryError ? (queryError as Error).message : null;
@@ -186,10 +197,10 @@ export function StudentCourseDetail() {
   const courseCertificateEnabledQuizzes =
     Array.isArray(course?.quizzes) && course.quizzes.length > 0
       ? course.quizzes.filter((quiz: any) =>
-          Boolean(quiz?.certificate) &&
-          String(quiz.certificate).toLowerCase() !== "0" &&
-          String(quiz.certificate).toLowerCase() !== "false"
-        )
+        Boolean(quiz?.certificate) &&
+        String(quiz.certificate).toLowerCase() !== "0" &&
+        String(quiz.certificate).toLowerCase() !== "false"
+      )
       : [];
 
   const courseCertificateStatus = courseProgress >= 100 ? "Completed" : "In Progress";
@@ -422,7 +433,7 @@ export function StudentCourseDetail() {
                       <p className="text-sm text-slate-500 mb-4">{currentItem.subtitle}</p>
                     )}
 
-              
+
 
                     <div className="mt-6 space-y-4">
                       <div>

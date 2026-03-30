@@ -66,10 +66,10 @@ export default function Courses() {
   };
   const [duplicatingCourseId, setDuplicatingCourseId] = useState<string | number | null>(null);
 
- 
+
   const requestIdRef = useRef(0);
 
- 
+
   function normalizeCoursesResponse(raw: unknown): PurchasedCourse[] {
     // WHY: Backend occasionally returns different shapes; normalize once.
     if (Array.isArray(raw)) return raw as PurchasedCourse[];
@@ -235,7 +235,7 @@ export default function Courses() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add New Course 
+                Add New Course
               </Button>
             </DialogTrigger>
 

@@ -13,7 +13,7 @@ interface Deadline {
   refId: string;
   title: string;
   course: string;
-  courseId?: string;
+  courseId: string;
   due_date: string;
   priority: string;
   hours_left: number;
@@ -76,6 +76,16 @@ export function RightSidebar() {
     };
   };
 
+  const normalizeApiList = (value: any): any[] => {
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === "object") {
+      if (Array.isArray(value.data)) return value.data;
+      if (Array.isArray(value.assignments)) return value.assignments;
+      if (Array.isArray(value.quizzes)) return value.quizzes;
+    }
+    return [];
+  };
+
   const dedupeDeadlines = (items: Deadline[]) => {
     const seen = new Set<string>();
     return items.filter((item) => {
@@ -97,12 +107,15 @@ export function RightSidebar() {
     }
     try {
       const shouldFilterByCourse = !isPrivileged && courseIds.size > 0;
-      const feedData = await apiFetch<{ assignments: any[]; quizzes: any[] }>("/feed/upcoming")
-        .catch(() => null);
-      const assignmentsSource = isPrivileged
+      const feedData = await apiFetch<any>("/feed/upcoming").catch(() => null);
+      const assignmentsSourceRaw = isPrivileged
         ? feedData?.assignments || []
-        : (await apiFetch<any[]>("/assignments").catch(() => []));
-      const quizzesSource = feedData?.quizzes || [];
+        : await apiFetch<any>("/assignments").catch(() => []);
+      const quizzesSourceRaw = feedData?.quizzes || [];
+
+      const assignmentsSource = normalizeApiList(assignmentsSourceRaw);
+      const quizzesSource = normalizeApiList(quizzesSourceRaw);
+
       let assignmentDeadlines = assignmentsSource
         .map((a) => buildDeadline(a, "assignment"))
         .filter((d): d is Deadline => Boolean(d))
