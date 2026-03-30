@@ -335,24 +335,26 @@ export default function Dashboard() {
       </div>
     </div>
     {/* Noticeboard: show unread_noticeboards as cards */}
-    <div>
-      <h3 className="text-2xl font-bold mb-4">Noticeboard</h3>
-      {Array.isArray(userDashboard?.unread_noticeboards) && userDashboard.unread_noticeboards.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {userDashboard.unread_noticeboards.map((notice: any) => (
-            <Card key={notice.id} className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
-              <h4 className="text-lg font-semibold mb-2">{notice.title}</h4>
-              <p className="text-sm text-muted-foreground mb-1">{notice.message}</p>
-              {notice.created_at && (
-                <span className="text-xs text-gray-500">{new Date(Number(notice.created_at) * 1000).toLocaleString()}</span>
-              )}
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <p className="text-muted-foreground">No unread notices.</p>
-      )}
-    </div>
+    {!isAdmin && (
+      <div>
+        <h3 className="text-2xl font-bold mb-4">Noticeboard</h3>
+        {Array.isArray(userDashboard?.unread_noticeboards) && userDashboard.unread_noticeboards.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {userDashboard.unread_noticeboards.map((notice: any) => (
+              <Card key={notice.id} className="p-4 border-l-4 border-yellow-500 bg-yellow-50">
+                <h4 className="text-lg font-semibold mb-2">{notice.title}</h4>
+                <p className="text-sm text-muted-foreground mb-1">{notice.message}</p>
+                {notice.created_at && (
+                  <span className="text-xs text-gray-500">{new Date(Number(notice.created_at) * 1000).toLocaleString()}</span>
+                )}
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">No unread notices.</p>
+        )}
+      </div>
+    )}
 
     
 
