@@ -183,12 +183,7 @@ export default function LMSGuides({ isAdmin, maxDisplay, showUploadButton = true
     <div className="space-y-6">
       {showUploadButton && (
         <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-semibold">LMS Learning Guides</h2>
-            <p className="text-sm text-muted-foreground">
-              Video tutorials available for all users
-            </p>
-          </div>
+         
           {isAdmin && (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>

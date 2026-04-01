@@ -16,8 +16,10 @@ import notificationsSlice from './slices/notificationsSlice';
 import purchasedCoursesSlice from './slices/PurchaseCourseSlice';
 import userDashboardSlice from './slices/userDashboardSlice';
 import profileSlice from './slices/profileSlice';
+import achievementsSlice from './slices/achievementsSlice';
 import commentsSlice from './slices/commentsSlice';
 import assignmentsSlice from './slices/assignmentsSlice';
+import learningStatusSlice from './slices/learningStatusSlice';
 
 
 const rootReducer = combineReducers({
@@ -32,8 +34,10 @@ const rootReducer = combineReducers({
   purchasedCourses: purchasedCoursesSlice,
   userDashboard: userDashboardSlice,
   profile: profileSlice,
+  achievements: achievementsSlice,
   comments: commentsSlice,
   assignments: assignmentsSlice,
+  learningStatus: learningStatusSlice,
 });
 
 export default rootReducer;

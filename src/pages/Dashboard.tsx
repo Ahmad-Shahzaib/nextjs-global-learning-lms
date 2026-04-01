@@ -358,16 +358,7 @@ export default function Dashboard() {
 
     
 
-    {/* LMS Guides Section */}
-    <div className="space-y-4 mt-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">LMS Learning Guides</h2>
-          <Button variant="outline" onClick={() => window.location.href = '/guides'}>
-            View All
-          </Button>
-        </div>
-        <LMSGuides isAdmin={isAdmin} maxDisplay={3} showUploadButton={false} />
-      </div>
+    
     </div>
   );
 }

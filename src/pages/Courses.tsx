@@ -109,7 +109,7 @@ export default function Courses() {
     } else {
       loadCourses();
     }
-  }, [user, isAdmin, dispatch]);
+  }, [user, isAdmin]);
 
   // Only used for admin, keep the old logic for admin
   const loadCourses = async () => {
@@ -366,14 +366,6 @@ export default function Courses() {
                     <Link
                       to={`/courses/${course.id}`}
                       className="flex-1"
-                      onMouseEnter={() =>
-                        queryClient.prefetchQuery({
-                          queryKey: ["courseDetail", course.id, user?.id],
-                          queryFn: () => fetchCourseDetail(course.id),
-                          staleTime: 15 * 60 * 1000,
-                          retry: 1,
-                        })
-                      }
                     >
                       <Button className="w-full">View Details</Button>
                     </Link>

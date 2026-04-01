@@ -118,17 +118,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
+      // If we already have a user and skip condition is met, don't re-fetch
+      if (userRef.current && status === "authenticated" && !opts.force) {
+        return true;
+      }
+
       if (refreshingRef.current && !opts.force) {
         return refreshingRef.current;
       }
 
-      setStatus("checking");
+      if (!userRef.current) {
+        setStatus("checking");
+      }
       setError(null);
 
       let settled = false;
       const fallbackTimer = setTimeout(() => {
         if (!settled) {
-          setError("Session check timed out. Please try again.");
+          if (!userRef.current) {
+            setError("Session check timed out. Please try again.");
+          }
           if (userRef.current) {
             setStatus("authenticated");
           } else {
@@ -282,9 +291,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const cached = loadCachedSession();
     const token = getAuthToken();
-    if (token && cached?.user) {
+    const cached = loadCachedSession();
+
+    // RESTORE FROM CACHE: Only if we don't have a user in memory yet
+    if (token && cached?.user && !user) {
       const cachedRoles = cached.roles || [];
       setUser(cached.user);
       setIsAdmin(cachedRoles.includes("admin"));
@@ -293,8 +304,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setRoles(cachedRoles);
       setStatus("authenticated");
     }
-    refresh();
-  }, [refresh, loadCachedSession]);
+
+    // SILENT REFRESH: Only if we have a token but NO user (memory or cache)
+    if (token && !user && !cached?.user) {
+      refresh();
+    }
+  }, [refresh, loadCachedSession, user]);
 
   const value = useMemo(
     () => ({

@@ -10,11 +10,9 @@ export const fetchPurchasedCourses = createAsyncThunk<PurchasedCourse[]>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiClient.get<{ data: PurchasedCourse[] }>(API_URL);
-      // if backend wraps data
       if (response.data && Array.isArray((response.data as any).data)) {
         return (response.data as any).data as PurchasedCourse[];
       }
-      // if backend returns array directly
       if (Array.isArray(response.data as unknown)) {
         return response.data as unknown as PurchasedCourse[];
       }
@@ -22,5 +20,14 @@ export const fetchPurchasedCourses = createAsyncThunk<PurchasedCourse[]>(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || error.message);
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const { purchasedCourses } = getState() as { purchasedCourses: { loaded: boolean; loading: boolean } };
+      if (purchasedCourses.loading || purchasedCourses.loaded) {
+        return false; // Skip if already loading or already loaded
+      }
+      return true;
+    },
   }
 );

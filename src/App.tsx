@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Courses = lazy(() => import("./pages/Courses"));
 const CourseDetail = lazy(() => import("./pages/CourseDetail"));
 const Assignments = lazy(() => import("./pages/Assignments"));
+const AdminAssignments = lazy(() => import("./pages/AdminAssignments"));
 const Timetable = lazy(() => import("./pages/Timetable"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Users = lazy(() => import("./pages/Users"));
@@ -125,6 +126,18 @@ const TeacherOrAdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Student-only route (not admin/accounts/teacher)
+const StudentRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAdmin, isAccounts, isTeacher, loading } = useAuth();
+  if (loading) return <LoadingSpinner />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (isAdmin || isAccounts || isTeacher) {
+    toast.error("Access denied. Student-only page.");
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <>{children}</>;
+};
+
 // Public-only route (redirects if already logged in)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -208,11 +221,19 @@ const App = () => (
                   } />
                   
                   <Route path="/assignments" element={
-                    <ProtectedRoute>
+                    <StudentRoute>
                       <DashboardLayout>
                         <Assignments />
                       </DashboardLayout>
-                    </ProtectedRoute>
+                    </StudentRoute>
+                  } />
+
+                  <Route path="/admin/assignments" element={
+                    <AdminRoute>
+                      <DashboardLayout>
+                        <AdminAssignments />
+                      </DashboardLayout>
+                    </AdminRoute>
                   } />
 
                   <Route path="/comment" element={

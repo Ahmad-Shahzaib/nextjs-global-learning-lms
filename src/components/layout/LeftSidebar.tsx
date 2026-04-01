@@ -92,7 +92,7 @@ const studentNavigationItems = [
 /* ================= ADMIN ================= */
 const bottomNavigationItems = [
   { icon: ShieldCheck, label: "Admin Category", href: "/admin-category", allowAdmin: true },
-  { icon: ClipboardList, label: "Assignments", href: "/assignments" },
+  { icon: ClipboardList, label: "Assignments", href: "/admin/assignments", allowAdmin: true },
   { icon: Calendar, label: "Timetable", href: "/timetable" },
   { icon: Library, label: "eLibrary", href: "/library" },
   { icon: Video, label: "Learning Guides", href: "/guides" },
@@ -127,7 +127,7 @@ export function LeftSidebar() {
     ? topNavigationItems.filter((item) => item.label === "Dashboard" || item.label === "All Courses")
     : topNavigationItems.filter((item) => item.label !== "All Courses");
   const bottomMenuItems = isAdmin
-    ? bottomNavigationItems
+    ? bottomNavigationItems.filter((item) => item.allowAdmin !== false)
     : isTeacher
     ? bottomNavigationItems.filter((item) => item.allowTeacher)
     : [];

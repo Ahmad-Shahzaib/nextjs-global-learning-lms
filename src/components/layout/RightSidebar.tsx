@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { apiFetch } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 interface Deadline {
   id: string;
@@ -20,212 +21,159 @@ interface Deadline {
   type: "assignment" | "quiz";
 }
 
+const isLikelyUuid = (value?: string) =>
+  Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value));
+
+const parseDeadline = (value?: string | null) => {
+  if (!value) return null;
+  let trimmed = String(value).trim();
+  if (!trimmed) return null;
+  trimmed = trimmed.replace(/\.\d+/, "");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const dateOnly = new Date(`${trimmed}T23:59:59`);
+    return Number.isNaN(dateOnly.getTime()) ? null : dateOnly;
+  }
+  const normalized = trimmed.includes(" ")
+    ? trimmed.replace(" ", "T")
+    : trimmed;
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const buildDeadline = (item: any, type: "assignment" | "quiz") => {
+  const deadline = item.custom_deadline || item.due_date;
+  if (!deadline) return null;
+  const dueDate = parseDeadline(deadline);
+  const now = new Date();
+  if (dueDate && dueDate.getTime() < now.getTime()) return null;
+  const hoursLeft = dueDate
+    ? Math.max(0, Math.floor((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60)))
+    : 0;
+  const courseId = item.course_id || (isLikelyUuid(item.course) ? item.course : "");
+  const courseLabel = item.course_title || item.course_code || item.course || item.course_id || "";
+  return {
+    id: `${type}-${item.id}`,
+    refId: item.id,
+    title: item.title,
+    course: courseLabel,
+    courseId,
+    due_date: deadline,
+    priority:
+      type === "quiz"
+        ? hoursLeft < 24
+          ? "high"
+          : hoursLeft < 72
+            ? "medium"
+            : "low"
+        : item.priority || "medium",
+    hours_left: hoursLeft,
+    type,           
+  };
+};
+
+const normalizeApiList = (value: any): any[] => {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === "object") {
+    if (Array.isArray(value.data)) return value.data;
+    if (Array.isArray(value.assignments)) return value.assignments;
+    if (Array.isArray(value.quizzes)) return value.quizzes;
+  }
+  return [];
+};
+
+const dedupeDeadlines = (items: Deadline[]) => {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = `${item.type}-${item.refId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export function RightSidebar() {
   const { user, isAdmin, isAccounts, isTeacher } = useAuth();
-  const [deadlines, setDeadlines] = useState<Deadline[]>([]);
-  const [submittedAssignmentIds, setSubmittedAssignmentIds] = useState<Set<string>>(new Set());
-  const [startedQuizIds, setStartedQuizIds] = useState<Set<string>>(new Set());
-  const [activeCourseIds, setActiveCourseIds] = useState<Set<string>>(new Set());
   const isPrivileged = useMemo(() => isAdmin || isAccounts || isTeacher, [isAdmin, isAccounts, isTeacher]);
-  const isLikelyUuid = (value?: string) =>
-    Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value));
-  const parseDeadline = (value?: string | null) => {
-    if (!value) return null;
-    let trimmed = String(value).trim();
-    if (!trimmed) return null;
-    trimmed = trimmed.replace(/\.\d+/, "");
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-      const dateOnly = new Date(`${trimmed}T23:59:59`);
-      return Number.isNaN(dateOnly.getTime()) ? null : dateOnly;
-    }
-    const normalized = trimmed.includes(" ")
-      ? trimmed.replace(" ", "T")
-      : trimmed;
-    const parsed = new Date(normalized);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  };
 
-  const buildDeadline = (item: any, type: "assignment" | "quiz") => {
-    const deadline = item.custom_deadline || item.due_date;
-    if (!deadline) return null;
-    const dueDate = parseDeadline(deadline);
-    const now = new Date();
-    if (dueDate && dueDate.getTime() < now.getTime()) return null;
-    const hoursLeft = dueDate
-      ? Math.max(0, Math.floor((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60)))
-      : 0;
-    const courseId = item.course_id || (isLikelyUuid(item.course) ? item.course : "");
-    const courseLabel = item.course_title || item.course_code || item.course || item.course_id || "";
-    return {
-      id: `${type}-${item.id}`,
-      refId: item.id,
-      title: item.title,
-      course: courseLabel,
-      courseId,
-      due_date: deadline,
-      priority:
-        type === "quiz"
-          ? hoursLeft < 24
-            ? "high"
-            : hoursLeft < 72
-              ? "medium"
-              : "low"
-          : item.priority || "medium",
-      hours_left: hoursLeft,
-      type,           
-    };
-  };
+  const { data: submissions = [] } = useQuery({
+    queryKey: ["submissions", user?.id],
+    queryFn: () => apiFetch<any[]>("/submissions?mine=true"),
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const normalizeApiList = (value: any): any[] => {
-    if (Array.isArray(value)) return value;
-    if (value && typeof value === "object") {
-      if (Array.isArray(value.data)) return value.data;
-      if (Array.isArray(value.assignments)) return value.assignments;
-      if (Array.isArray(value.quizzes)) return value.quizzes;
-    }
-    return [];
-  };
+  const { data: progressItems = [] } = useQuery({
+    queryKey: ["progress", user?.id],
+    queryFn: () => apiFetch<any[]>("/progress"),
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const dedupeDeadlines = (items: Deadline[]) => {
-    const seen = new Set<string>();
-    return items.filter((item) => {
-      const key = `${item.type}-${item.refId}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+  const { data: enrollments = [] } = useQuery({
+    queryKey: ["enrollments", user?.id],
+    queryFn: () => apiFetch<any[]>("/enrollments"),
+    enabled: !!user && !isPrivileged,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: feedData } = useQuery({
+    queryKey: ["feedUpcoming", user?.id],
+    queryFn: () => apiFetch<any>("/feed/upcoming"),
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const { data: assignments = [] } = useQuery({
+    queryKey: ["assignmentsList", user?.id],
+    queryFn: () => apiFetch<any>("/assignments"),
+    enabled: !!user && !isPrivileged,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const deadlines = useMemo(() => {
+    if (!user) return [];
+    
+    const submissionsArray = Array.isArray(submissions) ? submissions : (submissions as any)?.data || [];
+    const progressArray = Array.isArray(progressItems) ? progressItems : (progressItems as any)?.data || [];
+    const enrollmentsArray = Array.isArray(enrollments) ? enrollments : (enrollments as any)?.data || [];
+
+    const submittedIds = new Set(submissionsArray.map((s: any) => s.assignment_id).filter(Boolean));
+    const startedQuizzes = new Set(
+      progressArray
+        .filter((p: any) => p.item_type === "quiz" && p.quiz_id)
+        .map((p: any) => p.quiz_id)
+    );
+    const courseIds = new Set(
+      enrollmentsArray
+        .filter((e: any) => !e.status || e.status === "active")
+        .map((e: any) => e.course_id)
+        .filter(Boolean)
+    );
+
+    const shouldFilterByCourse = !isPrivileged && courseIds.size > 0;
+    const assignmentsSourceRaw = isPrivileged ? feedData?.assignments || [] : assignments;
+    const quizzesSourceRaw = feedData?.quizzes || [];
+
+    const assignmentsSource = normalizeApiList(assignmentsSourceRaw);
+    const quizzesSource = normalizeApiList(quizzesSourceRaw);
+
+    const assignmentDeadlines = assignmentsSource
+      .map((a) => buildDeadline(a, "assignment"))
+      .filter((d): d is Deadline => Boolean(d))
+      .filter((d) => !submittedIds.has(d.refId))
+      .filter((d) => !shouldFilterByCourse || !d.courseId || courseIds.has(d.courseId));
+
+    const quizDeadlines = (quizzesSource || [])
+      .map((q) => buildDeadline(q, "quiz"))
+      .filter((d): d is Deadline => Boolean(d))
+      .filter((d) => !startedQuizzes.has(d.refId));
+
+    return dedupeDeadlines([...assignmentDeadlines, ...quizDeadlines]).sort((a, b) => {
+      const aTime = parseDeadline(a.due_date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const bTime = parseDeadline(b.due_date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return aTime - bTime;
     });
-  };
-
-  const loadDeadlines = async (
-    submittedIds: Set<string>,
-    courseIds: Set<string>,
-    startedQuizzes: Set<string>
-  ) => {
-    if (!user) {
-      setDeadlines([]);
-      return;
-    }
-    try {
-      const shouldFilterByCourse = !isPrivileged && courseIds.size > 0;
-      const feedData = await apiFetch<any>("/feed/upcoming").catch(() => null);
-      const assignmentsSourceRaw = isPrivileged
-        ? feedData?.assignments || []
-        : await apiFetch<any>("/assignments").catch(() => []);
-      const quizzesSourceRaw = feedData?.quizzes || [];
-
-      const assignmentsSource = normalizeApiList(assignmentsSourceRaw);
-      const quizzesSource = normalizeApiList(quizzesSourceRaw);
-
-      let assignmentDeadlines = assignmentsSource
-        .map((a) => buildDeadline(a, "assignment"))
-        .filter((d): d is Deadline => Boolean(d))
-        .filter((d) => !submittedIds.has(d.refId))
-        .filter((d) => !shouldFilterByCourse || !d.courseId || courseIds.has(d.courseId));
-      const quizDeadlines = (quizzesSource || [])
-        .map((q) => buildDeadline(q, "quiz"))
-        .filter((d): d is Deadline => Boolean(d));
-      const filteredQuizDeadlines = quizDeadlines.filter((d) => !startedQuizzes.has(d.refId));
-      const combined = dedupeDeadlines([...assignmentDeadlines, ...filteredQuizDeadlines]);
-      const sorted = combined.sort(
-        (a, b) => {
-          const aTime = parseDeadline(a.due_date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-          const bTime = parseDeadline(b.due_date)?.getTime() ?? Number.MAX_SAFE_INTEGER;
-          return aTime - bTime;
-        }
-      );
-      setDeadlines(sorted);
-    } catch (error) {
-      console.error("Error fetching deadlines:", error);
-      setDeadlines([]);
-    }
-  };
-
-  useEffect(() => {
-    let active = true;
-    const loadSubmissions = async () => {
-      if (!user) {
-        setSubmittedAssignmentIds(new Set());
-        return;
-      }
-      try {
-        const submissions = await apiFetch<any[]>("/submissions?mine=true");
-        if (!active) return;
-        const submittedIds = new Set(
-          submissions.map((s) => s.assignment_id).filter(Boolean)
-        );
-        setSubmittedAssignmentIds(submittedIds);
-      } catch (error) {
-        if (active) {
-          setSubmittedAssignmentIds(new Set());
-        }
-      }
-    };
-    loadSubmissions();
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
-  useEffect(() => {
-    let active = true;
-    const loadQuizProgress = async () => {
-      if (!user) {
-        setStartedQuizIds(new Set());
-        return;
-      }
-      try {
-        const progress = await apiFetch<any[]>("/progress");
-        if (!active) return;
-        const quizIds = new Set(
-          progress
-            .filter((p) => p.item_type === "quiz" && p.quiz_id)
-            .map((p) => p.quiz_id)
-        );
-        setStartedQuizIds(quizIds);
-      } catch (error) {
-        if (active) {
-          setStartedQuizIds(new Set());
-        }
-      }
-    };
-    loadQuizProgress();
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
-  useEffect(() => {
-    let active = true;
-    const loadEnrollments = async () => {
-      if (!user || isPrivileged) {
-        setActiveCourseIds(new Set());
-        return;
-      }
-      try {
-        const enrollments = await apiFetch<any[]>("/enrollments");
-        if (!active) return;
-        const ids = new Set(
-          enrollments
-            .filter((e) => !e.status || e.status === "active")
-            .map((e) => e.course_id)
-            .filter(Boolean)
-        );
-        setActiveCourseIds(ids);
-      } catch {
-        if (active) {
-          setActiveCourseIds(new Set());
-        }
-      }
-    };
-    loadEnrollments();
-    return () => {
-      active = false;
-    };
-  }, [user, isPrivileged]);
-
-  useEffect(() => {
-    loadDeadlines(submittedAssignmentIds, activeCourseIds, startedQuizIds);
-  }, [user, submittedAssignmentIds, activeCourseIds, startedQuizIds, isPrivileged]);
+  }, [user, feedData, assignments, submissions, progressItems, enrollments, isPrivileged]);
 
   return (
     <ScrollArea className="h-full">

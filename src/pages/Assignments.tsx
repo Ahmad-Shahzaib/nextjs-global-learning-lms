@@ -237,7 +237,7 @@ const Assignments = () => {
             variant="secondary"
             onClick={() => openSendDialog(row.id)}
           >
-            Send message
+            Send Assessment
           </Button>
         </div>
       ),
