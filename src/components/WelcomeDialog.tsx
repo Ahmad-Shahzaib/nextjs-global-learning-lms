@@ -48,7 +48,7 @@ export function WelcomeDialog() {
             Welcome, {userName}!
           </DialogTitle>
           
-          <p className="text-foreground text-lg">
+          <p className="text-white text-lg">
             Ready to continue your learning journey?
           </p>
         </DialogHeader>
