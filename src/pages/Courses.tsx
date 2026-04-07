@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import { PurchasedCourse } from "@/store/purchasedCourses/types";
 
-/* ─── category color map ──────────────────────────────── */
+/* ─── category color map ──────────────────────── */
 const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
   "Bachelor's": { bg: "bg-orange-50",  text: "text-orange-700",  border: "border-orange-200" },
   "Master's":   { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200"  },
@@ -43,16 +43,18 @@ function getCategoryStyle(cat?: string) {
 /* ─── skeleton card ───────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-orange-100/70 bg-white shadow-sm shadow-orange-50/80 animate-pulse">
-      <div className="h-44 bg-gradient-to-br from-orange-50 via-amber-100 to-orange-50" />
-      <div className="space-y-4 p-5">
-        <div className="h-3 w-24 rounded-full bg-slate-200" />
-        <div className="h-6 w-3/4 rounded-2xl bg-slate-200" />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="h-16 rounded-3xl bg-slate-200" />
-          <div className="h-16 rounded-3xl bg-slate-200" />
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm animate-pulse">
+      <div className="h-36 bg-gradient-to-br from-gray-50 to-gray-100" />
+      <div className="space-y-3 p-4">
+        <div className="h-2.5 w-20 rounded-full bg-gray-200" />
+        <div className="h-5 w-3/4 rounded-lg bg-gray-200" />
+        <div className="grid gap-2 grid-cols-2">
+          <div className="h-12 rounded-lg bg-gray-200" />
+          <div className="h-12 rounded-lg bg-gray-200" />
+          <div className="h-12 rounded-lg bg-gray-200" />
+          <div className="h-12 rounded-lg bg-gray-200" />
         </div>
-        <div className="h-10 rounded-3xl bg-orange-100" />
+        <div className="h-9 rounded-lg bg-gray-200" />
       </div>
     </div>
   );
@@ -88,10 +90,10 @@ function CourseCard({
   const price = course.price ? course.price : "Free";
 
   return (
-    <div className="group relative overflow-hidden rounded-[28px] border border-orange-100/60 bg-white shadow-sm shadow-orange-50/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-100/80">
+    <div className="group relative overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
 
       {/* ── image / cover ── */}
-      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-orange-50 via-amber-100 to-amber-50">
+      <div className="relative h-36 w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
         {coverImage ? (
           <img
             src={coverImage}
@@ -100,63 +102,63 @@ function CourseCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <GraduationCap className="h-16 w-16 text-orange-200" />
+            <GraduationCap className="h-12 w-12 text-gray-300" />
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
-        <span className={`absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
-          <Tag className="h-3 w-3" />
+        <span className={`absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
+          <Tag className="h-2.5 w-2.5" />
           {course.category || "General"}
         </span>
 
-        <span className={`absolute right-4 top-4 z-10 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] ${statusColor}`}>
+        <span className={`absolute right-3 top-3 z-10 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] ${statusColor}`}>
           {statusLabel}
         </span>
       </div>
 
       {/* ── body ── */}
-      <div className="flex flex-1 flex-col gap-5 p-6">
-        <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-orange-500">
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">
             {courseCode}
           </p>
-          <h3 className="line-clamp-2 text-xl font-bold leading-tight text-slate-900">
+          <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900">
             {course.title}
           </h3>
         </div>
 
-        <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Duration</p>
-            <p className="mt-1 font-semibold text-slate-800">{course.duration || "N/A"}</p>
+        <div className="grid gap-2 text-sm text-gray-600 grid-cols-3">
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Duration</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{course.duration || "N/A"}</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Instructor</p>
-            <p className="mt-1 font-semibold text-slate-800">{instructor}</p>
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Instructor</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{instructor}</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Progress</p>
-            <p className="mt-1 font-semibold text-slate-800">{progress != null ? `${progress}%` : "N/A"}</p>
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Progress</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{progress != null ? `${progress}%` : "N/A"}</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Access</p>
-            <p className="mt-1 font-semibold text-slate-800">{accessDays}</p>
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Access</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{accessDays}</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Purchased</p>
-            <p className="mt-1 font-semibold text-slate-800">{purchasedAt}</p>
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Purchased</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{purchasedAt}</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Price</p>
-            <p className="mt-1 font-semibold text-slate-800">{price}</p>
+          <div className="bg-gray-50/90 p-2 rounded-lg">
+            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Price</p>
+            <p className="mt-0.5 font-semibold text-gray-800">{price}</p>
           </div>
         </div>
 
         <div className="mt-auto">
           <Link to={`/courses/${course.id}`} className="block">
-            <button className="group/btn flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-orange-200 transition-all duration-200 hover:from-orange-600 hover:to-amber-500 hover:shadow-md hover:shadow-orange-200">
+            <button className="group/btn flex w-full items-center justify-center gap-2 rounded-lg bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-orange-700">
               View Details
               <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
             </button>
@@ -432,7 +434,7 @@ export default function Courses() {
       </div>
 
       {/* ── Grid ── */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
 
         {/* loading skeletons */}
         {isLoading && Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
@@ -451,12 +453,12 @@ export default function Courses() {
 
         {/* empty state */}
         {!isLoading && filteredCourses.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-dashed border-orange-200 bg-orange-50/40 py-20 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100">
-              <BookOpen className="h-8 w-8 text-orange-400" />
+          <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/40 py-20 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100">
+              <BookOpen className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-700">No courses found</h3>
-            <p className="mt-1 max-w-xs text-sm text-slate-400">
+            <h3 className="text-lg font-bold text-gray-700">No courses found</h3>
+            <p className="mt-1 max-w-xs text-sm text-gray-400">
               {isAdmin
                 ? 'Click "Add New Course" to publish your first course.'
                 : "You haven't been enrolled in any courses yet."}
