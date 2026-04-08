@@ -54,7 +54,7 @@ const CategoryList = () => {
   }, [dispatch]);
 
   return (
-    <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+    <div className=" mx-auto mt-8 p-6 bg-white rounded-xl shadow-lg border border-gray-200">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Categories</h2>
       <CommonTable
         columns={columns}

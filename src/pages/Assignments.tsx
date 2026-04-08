@@ -272,7 +272,7 @@ const Assignments = () => {
           <DialogHeader>
             <DialogTitle>Assignment Details</DialogTitle>
             <DialogDescription>
-              View detailed assignment data returned from the API.
+              View detailed assignment data.
             </DialogDescription>
           </DialogHeader>
 

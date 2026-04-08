@@ -258,7 +258,7 @@ export function LeftSidebar() {
 
           {/* name + role */}
           <div className="relative z-10 min-w-0 flex-1">
-            <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">{userName}</p>
+            {/* <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">{userName}</p> */}
             <span className={cn("mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold", rc.pill)}>
               {userRole}
             </span>

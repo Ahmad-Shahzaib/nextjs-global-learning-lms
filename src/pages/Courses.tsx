@@ -129,30 +129,30 @@ function CourseCard({
           </h3>
         </div>
 
-        <div className="grid gap-2 text-sm text-gray-600 grid-cols-3">
+        <div className="grid gap-2 text-xs text-gray-600 grid-cols-3">
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Duration</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{course.duration || "N/A"}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Duration</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{course.duration || "N/A"}</p>
           </div>
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Instructor</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{instructor}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Instructor</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{instructor}</p>
           </div>
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Progress</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{progress != null ? `${progress}%` : "N/A"}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Progress</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{progress != null ? `${progress}%` : "N/A"}</p>
           </div>
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Access</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{accessDays}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Access</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{accessDays}</p>
           </div>
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Purchased</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{purchasedAt}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Purchased</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{purchasedAt}</p>
           </div>
           <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[9px] uppercase tracking-[0.24em] text-gray-400">Price</p>
-            <p className="mt-0.5 font-semibold text-gray-800">{price}</p>
+            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Price</p>
+            <p className="mt-0.5 text-xs font-semibold text-gray-800">{price}</p>
           </div>
         </div>
 

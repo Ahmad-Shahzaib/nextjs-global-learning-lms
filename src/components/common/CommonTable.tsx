@@ -10,11 +10,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export interface ColumnDef<T> {
-  /** Column header label */
   header: string;
-  /** Key of the row data object, or a custom render function */
   accessor: keyof T | ((row: T, index: number) => React.ReactNode);
-  /** Optional class names for the <th> / <td> */
   className?: string;
 }
 
@@ -22,11 +19,8 @@ interface CommonTableProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
   loading?: boolean;
-  /** Number of skeleton rows shown while loading */
   skeletonRows?: number;
-  /** Message displayed when data is empty and not loading */
   emptyMessage?: string;
-  /** Optional row key — defaults to index */
   rowKey?: (row: T, index: number) => string | number;
 }
 
@@ -38,7 +32,11 @@ function CommonTable<T>({
   emptyMessage = "No data available.",
   rowKey,
 }: CommonTableProps<T>) {
-  const getCellValue = (row: T, accessor: ColumnDef<T>["accessor"], index: number) => {
+  const getCellValue = (
+    row: T,
+    accessor: ColumnDef<T>["accessor"],
+    index: number
+  ) => {
     if (typeof accessor === "function") return accessor(row, index);
     const value = row[accessor as keyof T];
     if (value === null || value === undefined) return "—";
@@ -46,50 +44,61 @@ function CommonTable<T>({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((col, idx) => (
-            <TableHead key={idx} className={col.className}>
-              {col.header}
-            </TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-
-      <TableBody>
-        {loading ? (
-          Array.from({ length: skeletonRows }).map((_, rowIdx) => (
-            <TableRow key={rowIdx}>
-              {columns.map((_, colIdx) => (
-                <TableCell key={colIdx}>
-                  <Skeleton className="h-4 w-full" />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
-        ) : data.length === 0 ? (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+      <Table className="min-w-full divide-y divide-gray-200">
+        <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableCell
-              colSpan={columns.length}
-              className="py-10 text-center text-muted-foreground"
-            >
-              {emptyMessage}
-            </TableCell>
+            {columns.map((col, idx) => (
+              <TableHead
+                key={idx}
+                className={`px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider ${col.className}`}
+              >
+                {col.header}
+              </TableHead>
+            ))}
           </TableRow>
-        ) : (
-          data.map((row, rowIdx) => (
-            <TableRow key={rowKey ? rowKey(row, rowIdx) : rowIdx}>
-              {columns.map((col, colIdx) => (
-                <TableCell key={colIdx} className={col.className}>
-                  {getCellValue(row, col.accessor, rowIdx)}
-                </TableCell>
-              ))}
+        </TableHeader>
+
+        <TableBody className="bg-white divide-y divide-gray-100">
+          {loading ? (
+            Array.from({ length: skeletonRows }).map((_, rowIdx) => (
+              <TableRow key={rowIdx} className="hover:bg-gray-50 transition-colors">
+                {columns.map((_, colIdx) => (
+                  <TableCell key={colIdx} className="px-4 py-3">
+                    <Skeleton className="h-4 w-full rounded-md" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : data.length === 0 ? (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="py-10 text-center text-gray-400 italic"
+              >
+                {emptyMessage}
+              </TableCell>
             </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
+          ) : (
+            data.map((row, rowIdx) => (
+              <TableRow
+                key={rowKey ? rowKey(row, rowIdx) : rowIdx}
+                className="hover:bg-gray-50 transition-colors"
+              >
+                {columns.map((col, colIdx) => (
+                  <TableCell
+                    key={colIdx}
+                    className={`px-4 py-3 text-sm text-gray-700 ${col.className}`}
+                  >
+                    {getCellValue(row, col.accessor, rowIdx)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 

@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   BookOpen, Clock, PlayCircle, Trash2, Copy, Edit2,
-  Users, ShoppingCart, TicketCheck, Wallet, MessageCircle, CalendarCheck2,
-  MessageSquare, TrendingUp, Bell, ChevronRight,
+  Users, ShoppingCart, TicketCheck, Wallet, MessageCircle,
+  CalendarCheck2, MessageSquare, TrendingUp, Bell, ChevronRight,
 } from "lucide-react";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { useState, useEffect } from "react";
@@ -27,7 +27,7 @@ interface Course {
   grade: string | null;
 }
 
-/* ─── Professional Stat Card ─────────────────────────────────────── */
+/* ─── Modern Premium Stat Card ───────────────────────────────────── */
 function StatCard({
   label,
   value,
@@ -42,35 +42,58 @@ function StatCard({
   loading?: boolean;
 }) {
   const accentMap = {
-    primary: "border-violet-200/80 bg-white/90 dark:border-violet-800/80 dark:bg-slate-950/80",
-    accent: "border-indigo-200/80 bg-white/90 dark:border-indigo-800/80 dark:bg-slate-950/80",
-    success: "border-emerald-200/80 bg-white/90 dark:border-emerald-800/80 dark:bg-slate-950/80",
-    warn: "border-amber-200/80 bg-white/90 dark:border-amber-800/80 dark:bg-slate-950/80",
+    primary: "from-violet-500 to-indigo-600",
+    accent: "from-blue-500 to-cyan-500",
+    success: "from-emerald-500 to-teal-600",
+    warn: "from-amber-500 to-orange-500",
   };
 
-  const iconMap = {
-    primary: "bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-300",
-    accent: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300",
-    success: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300",
-    warn: "bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300",
+  const bgMap = {
+    primary: "bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/40 dark:to-indigo-950/40 border-violet-200/60 dark:border-violet-800/40",
+    accent: "bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-blue-200/60 dark:border-blue-800/40",
+    success: "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-emerald-200/60 dark:border-emerald-800/40",
+    warn: "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200/60 dark:border-amber-800/40",
+  };
+
+  const iconBgMap = {
+    primary: "bg-white dark:bg-slate-900 shadow-md shadow-violet-500/20",
+    accent: "bg-white dark:bg-slate-900 shadow-md shadow-blue-500/20",
+    success: "bg-white dark:bg-slate-900 shadow-md shadow-emerald-500/20",
+    warn: "bg-white dark:bg-slate-900 shadow-md shadow-amber-500/20",
+  };
+
+  const iconColorMap = {
+    primary: "text-violet-600 dark:text-violet-400",
+    accent: "text-blue-600 dark:text-cyan-400",
+    success: "text-emerald-600 dark:text-emerald-400",
+    warn: "text-amber-600 dark:text-orange-400",
   };
 
   return (
-    <Card className={`group min-h-[150px] overflow-hidden rounded-[1.75rem] border p-0 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl ${accentMap[accent]}`}>
-      <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
-        <div>
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+    <Card className={`group relative min-h-[140px] overflow-hidden rounded-3xl border border-slate-200/70 bg-white/95 p-0 shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80 ${bgMap[accent]}`}>
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-10 ${accentMap[accent]}`} />
+
+      <CardContent className="relative flex h-full flex-col justify-between p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold tracking-[0.32em] text-slate-500 dark:text-slate-400 uppercase">
               {label}
             </p>
-            <div className={`rounded-3xl p-3 ${iconMap[accent]}`}>
-              <Icon className="h-5 w-5" />
-            </div>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+              {loading ? (
+                <span className="inline-block h-10 w-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-700" />
+              ) : (
+                value
+              )}
+            </p>
           </div>
-          <p className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {loading ? <span className="inline-block h-10 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" /> : value}
-          </p>
+
+          <div className={`rounded-2xl p-2.5 transition-all duration-300 group-hover:scale-105 ${iconBgMap[accent]}`}>
+            <Icon className={`h-7 w-7 ${iconColorMap[accent]}`} />
+          </div>
         </div>
+
+        <div className={`absolute bottom-4 left-5 h-1 w-12 rounded-full bg-gradient-to-r ${accentMap[accent]}`} />
       </CardContent>
     </Card>
   );
@@ -139,32 +162,33 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-10 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="space-y-4 pb-12 px-4 ">
       <WelcomeDialog />
 
-      <div className="mx-auto w-full max-w-[1200px] rounded-[2rem] border border-slate-200/70 bg-slate-50/85 p-6 shadow-sm shadow-slate-400/5 backdrop-blur dark:border-slate-700/80 dark:bg-slate-950/65">
+      {/* Header */}
+      <div className="mx-auto w-full max-w-full xl:max-w-[1200px] rounded-2xl  border border-slate-200/70 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/70">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
               {isAdmin ? "Administration" : "Learning Management"}
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <h1 className="mt-1 text-5xl font-semibold text-slate-950 dark:text-white">
               Dashboard
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="mt-3 max-w-2xl  text-slate-600 dark:text-slate-400">
               Your learning and platform overview, redesigned with cleaner cards and clearer hierarchy.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {isEditMode && (
-              <Badge variant="outline" className="rounded-full border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200">
-                <Edit2 className="h-4 w-4" />
+              <Badge variant="outline" className="rounded-full border-violet-500/40 bg-violet-500/10 px-5 py-2 text-sm font-semibold text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/10 dark:text-violet-200">
+                <Edit2 className="h-4 w-4 mr-2" />
                 Edit Mode Active
               </Badge>
             )}
             {isAdmin && (
-              <Badge className="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-violet-500/20">
+              <Badge className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/30">
                 Admin View
               </Badge>
             )}
@@ -174,19 +198,24 @@ export default function Dashboard() {
 
       {/* Admin Stats */}
       {isAdmin && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-5 w-5 text-violet-600" />
-            <h2 className="text-lg font-semibold tracking-tight">Platform Overview</h2>
+        <section className="space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Platform Overview</h2>
+              <p className="text-slate-500 dark:text-slate-400">Real-time platform statistics</p>
+            </div>
           </div>
 
           {adminError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-400">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 dark:border-red-900 dark:bg-red-950/60 dark:text-red-400">
               {adminError}
             </div>
           )}
 
-          <div className="grid gap-5 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
             <StatCard label="Total Users" value={adminCounts?.total_users ?? "—"} icon={Users} accent="primary" loading={adminLoading} />
             <StatCard label="Total Courses" value={adminCounts?.total_courses ?? "—"} icon={BookOpen} accent="accent" loading={adminLoading} />
             <StatCard label="Total Sales" value={adminCounts?.total_sales ?? "—"} icon={ShoppingCart} accent="success" loading={adminLoading} />
@@ -195,15 +224,20 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* User Stats */}
+      {/* User Stats - New Modern Design */}
       {!isAdmin && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-5 w-5 text-emerald-600" />
-            <h2 className="text-lg font-semibold tracking-tight">Your Activity</h2>
+        <section className="space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Your Activity</h2>
+              <p className="text-slate-500 dark:text-slate-400">Overview of your learning journey</p>
+            </div>
           </div>
 
-          <div className="grid gap-5 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
             <StatCard label="Account Balance" value={`$${userDashboard?.balance ?? 0}`} icon={Wallet} accent="success" loading={userLoading} />
             <StatCard label="Purchased Courses" value={userDashboard?.webinarsCount ?? 0} icon={BookOpen} accent="accent" loading={userLoading} />
             <StatCard label="Support Messages" value={userDashboard?.supportsCount ?? 0} icon={MessageCircle} accent="primary" loading={userLoading} />
@@ -213,18 +247,20 @@ export default function Dashboard() {
         </section>
       )}
 
-      {/* Enrolled Courses */}
+      {/* Enrolled Courses - Kept original for now (can be redesigned later if needed) */}
       {courses.length > 0 && (
         <section className="space-y-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-5 w-5 text-violet-600" />
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white">Enrolled Courses</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">A refined view of your active courses and progress.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Enrolled Courses</h2>
+                <p className="text-slate-500 dark:text-slate-400">Your active courses and progress</p>
               </div>
             </div>
-            <Badge variant="secondary" className="rounded-full px-4 py-2 text-sm font-semibold">
+            <Badge variant="secondary" className="rounded-full px-6 py-2 text-sm font-semibold">
               {courses.length} Course{courses.length !== 1 ? "s" : ""}
             </Badge>
           </div>
@@ -233,7 +269,7 @@ export default function Dashboard() {
             {courses.map((course) => (
               <Card
                 key={course.id}
-                className="group relative min-w-0 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-700/80 dark:bg-slate-950/80"
+                className="group relative min-w-0 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80"
               >
                 {isEditMode && (
                   <div className="absolute right-4 top-4 z-10 flex items-center gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -246,27 +282,27 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <CardHeader className="space-y-4 border-b border-slate-200/80 px-6 pb-5 pt-6 dark:border-slate-700/80">
-                  <div className="flex items-center justify-between gap-3">
-                    <Badge variant="outline" className="font-mono text-xs tracking-[0.18em] text-slate-600 dark:text-slate-300">
+                <CardHeader className="space-y-4 border-b border-slate-200/80 px-7 pb-6 pt-7 dark:border-slate-700/70">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="font-mono text-xs tracking-widest text-slate-600 dark:text-slate-300">
                       {course.code}
                     </Badge>
-                    <Badge variant="secondary" className="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                    <Badge variant="secondary" className="rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-widest">
                       {course.grade ?? "In Progress"}
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+                  <CardTitle className="text-2xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
                     {course.title}
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="space-y-6 px-6 pb-6 pt-5">
+                <CardContent className="space-y-7 px-7 pb-7 pt-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
                       <span>Progress</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{course.progress}%</span>
                     </div>
-                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-500 transition-all duration-700"
                         style={{ width: `${course.progress}%` }}
@@ -274,30 +310,30 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  <div className="grid gap-3 rounded-3xl border border-slate-200/80 bg-slate-50/90 p-4 text-sm text-slate-700 dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-300">
-                    <div className="flex items-center justify-between gap-2">
+                  <div className="grid gap-4 rounded-2xl border border-slate-200/70 bg-slate-50/90 p-5 text-sm dark:border-slate-700/70 dark:bg-slate-900/70">
+                    <div className="flex justify-between">
                       <span className="text-slate-500 dark:text-slate-400">Instructor</span>
-                      <span className="font-medium">{course.instructor ?? "TBA"}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{course.instructor ?? "TBA"}</span>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex justify-between">
                       <span className="text-slate-500 dark:text-slate-400">Next Class</span>
-                      <span className="font-medium">{course.next_class ?? "Not scheduled"}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{course.next_class ?? "Not scheduled"}</span>
                     </div>
                   </div>
 
                   {!isEditMode ? (
                     <Button
                       onClick={() => navigate(`/courses/${course.id}`)}
-                      className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-violet-500/20 transition hover:from-violet-700 hover:to-indigo-700"
+                      className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 py-6 text-base font-semibold text-white shadow-xl shadow-violet-500/30 transition-all hover:from-violet-700 hover:to-indigo-700"
                     >
-                      <div className="flex items-center justify-center gap-2">
-                        <PlayCircle className="h-5 w-5" />
+                      <div className="flex items-center justify-center gap-3">
+                        <PlayCircle className="h-6 w-6" />
                         Continue Learning
-                        <ChevronRight className="h-5 w-5 opacity-80" />
+                        <ChevronRight className="h-6 w-6 opacity-80" />
                       </div>
                     </Button>
                   ) : (
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-4 pt-3">
                       <Input
                         value={course.title}
                         onChange={(e) => updateCourse(course.id, "title", e.target.value)}
@@ -327,26 +363,30 @@ export default function Dashboard() {
       {!isAdmin && userDashboard?.unread_noticeboards?.length > 0 && (
         <section className="space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-amber-600" />
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <Bell className="h-6 w-6 text-white" />
+              </div>
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white">Noticeboard</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Stay on top of unread announcements and updates.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Noticeboard</h2>
+                <p className="text-slate-500 dark:text-slate-400">Stay updated with important announcements</p>
               </div>
             </div>
-            <Badge className="rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-amber-500/20">
+            <Badge className="rounded-full bg-amber-500 px-6 py-2 text-sm font-semibold text-white shadow-lg">
               {userDashboard.unread_noticeboards.length} Unread
             </Badge>
           </div>
 
-          <div className="grid gap-5 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
+          <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(340px,1fr))]">
             {userDashboard.unread_noticeboards.map((notice: any) => (
-              <Card key={notice.id} className="overflow-hidden rounded-[1.75rem] border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white shadow-sm dark:border-amber-900/50 dark:from-amber-950/20 dark:to-slate-950">
-                <CardContent className="p-6">
-                  <h4 className="font-semibold text-lg leading-tight mb-3">{notice.title}</h4>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{notice.message}</p>
+              <Card key={notice.id} className="overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-amber-50 to-white shadow-xl dark:border-amber-900/40 dark:from-amber-950/30 dark:to-slate-950">
+                <CardContent className="p-8">
+                  <h4 className="font-semibold text-xl leading-tight mb-4 text-amber-900 dark:text-amber-100">
+                    {notice.title}
+                  </h4>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{notice.message}</p>
                   {notice.created_at && (
-                    <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="mt-6 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <Clock className="h-4 w-4" />
                       {new Date(Number(notice.created_at) * 1000).toLocaleDateString('en-US', { 
                         year: 'numeric', 
