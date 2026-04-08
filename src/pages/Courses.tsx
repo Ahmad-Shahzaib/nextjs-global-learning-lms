@@ -124,7 +124,7 @@ function CourseCard({
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">
             {courseCode}
           </p>
-          <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900">
+          <h3 className="text-sm font-semibold text-gray-900">
             {course.title}
           </h3>
         </div>

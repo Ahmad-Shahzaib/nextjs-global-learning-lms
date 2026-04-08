@@ -41,6 +41,9 @@ const Assignments = () => {
   const [activeAssignmentId, setActiveAssignmentId] = useState<number | null>(null);
   const [messageText, setMessageText] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const {
     items,
@@ -111,6 +114,33 @@ const Assignments = () => {
       return () => window.clearTimeout(timer);
     }
   }, [sendMessageSuccess]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    return items.filter((item) => {
+      const title = item.title?.toLowerCase() ?? "";
+      const webinar = item.webinar_title?.toLowerCase() ?? "";
+      const student = item.student?.full_name?.toLowerCase() ?? "";
+      const status = item.user_status?.toLowerCase() ?? "";
+      return (
+        title.includes(normalizedQuery) ||
+        webinar.includes(normalizedQuery) ||
+        student.includes(normalizedQuery) ||
+        status.includes(normalizedQuery)
+      );
+    });
+  }, [items, searchQuery]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const paginatedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, filteredItems]);
 
   const detailContent = useMemo(() => {
     if (selectedLoading) return "Loading assignment details...";
@@ -224,7 +254,7 @@ const Assignments = () => {
     {
       header: "Actions",
       accessor: (row) => (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-nowrap items-center gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -242,6 +272,7 @@ const Assignments = () => {
         </div>
       ),
     },
+
   ];
 
   return (
@@ -252,19 +283,62 @@ const Assignments = () => {
         </CardHeader>
 
         <CardContent>
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200/70 bg-slate-50 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1 min-w-0">
+              <label className="mb-1 block text-sm font-medium text-slate-600">
+                Search assignments
+              </label>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by title, webinar, student, or status"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-primary focus:outline-none"
+              />
+            </div>
+
+            {/* <div className="flex items-center justify-between gap-3 text-sm text-slate-600 sm:justify-end">
+              <p className="whitespace-nowrap">
+                {filteredItems.length} assignment{filteredItems.length === 1 ? "" : "s"} 
+              </p>
+             
+            </div> */}
+          </div>
+
           {error && !loading && (
             <p className="text-sm text-destructive">{error}</p>
           )}
 
           <CommonTable
             columns={columns}
-            data={items}
+            data={paginatedItems}
             loading={loading}
             emptyMessage={error || "No assignments found."}
             rowKey={(row) => row.id}
             skeletonRows={5}
           />
+          
         </CardContent>
+         <div className="flex items-center gap-2 p-3">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm font-medium">
+                  {currentPage} / {pageCount}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
+                  disabled={currentPage === pageCount}
+                >
+                  Next
+                </Button>
+              </div>
       </Card>
 
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>

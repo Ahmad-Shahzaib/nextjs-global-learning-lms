@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { LeftSidebar } from "./LeftSidebar";
-import { RightSidebar } from "./RightSidebar";
+// import { RightSidebar } from "./RightSidebar";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -215,15 +215,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <User className="h-5 w-5" />
             </Button> */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-              className="hover:bg-accent/20 hover:text-accent transition-all duration-300"
-              aria-label="Toggle alerts sidebar"
-            >
-              {rightSidebarOpen ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-            </Button>
+            {/* Right sidebar toggle temporarily disabled */}
           </div>
         </div>
       </header>
@@ -243,7 +235,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Main Content */}
         <main
-          className="flex-1 overflow-y-auto hide-scrollbar p-4 md:p-6 lg:p-8 relative h-[calc(100vh-4rem)] bg-sidebar"
+          className="flex-1 overflow-y-auto hide-scrollbar p-3 md:p-4 lg:p-4 relative h-[calc(100vh-4rem)] bg-sidebar"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           {/* Background decorative elements */}
@@ -256,16 +248,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </main>
 
-        {/* Right Sidebar */}
+        {/* Right Sidebar disabled for now */}
+        {/*
         <aside
           className={`transition-all duration-300 ease-smooth overflow-y-auto hide-scrollbar h-[calc(100vh-4rem)] border-l border-border/50 bg-sidebar shadow-2xl z-40 ${rightSidebarClasses}`}
           aria-label="Alerts and deadlines"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           <RightSidebar />
-          {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
         </aside>
+        */}
 
         {/* Overlay for mobile when sidebars are open */}
         {isMobile && (leftSidebarOpen || rightSidebarOpen) && (

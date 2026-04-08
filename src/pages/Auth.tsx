@@ -137,7 +137,7 @@ export default function Auth() {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-12 py-16 relative z-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-12  md:py-8 lg:py-16 relative z-10">
         <Card
           className="w-full max-w-lg bg-card/80 backdrop-blur-xl border border-border/60 shadow-2xl 
                      transition-all duration-500 hover:shadow-3xl hover:-translate-y-1 
