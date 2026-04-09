@@ -138,11 +138,11 @@ export default function ELibrary() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[1.5fr_0.85fr]">
-          <Card className="overflow-hidden border border-orange-100 shadow-lg dark:border-slate-800 dark:bg-slate-950/90">
+          <Card className="overflow-hidden border border-orange-100 shadow-lg bg-orange-50/90 dark:border-slate-800 dark:bg-slate-950/90">
             <CardHeader className="bg-gradient-to-r from-orange-600 via-orange-700 to-orange-800 px-6 py-6 text-white dark:from-slate-800 dark:via-slate-900 dark:to-slate-950">
               <CardTitle className="text-2xl">Search the library</CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-orange-50/90 dark:bg-slate-900/80">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-orange-400 dark:text-slate-500" />
                 <Input
