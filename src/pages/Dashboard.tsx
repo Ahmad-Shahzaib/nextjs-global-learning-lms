@@ -49,10 +49,10 @@ function StatCard({
   };
 
   const bgMap = {
-    primary: "bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/40 dark:to-indigo-950/40 border-violet-200/60 dark:border-violet-800/40",
-    accent: "bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border-blue-200/60 dark:border-blue-800/40",
-    success: "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/40 border-emerald-200/60 dark:border-emerald-800/40",
-    warn: "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40 border-amber-200/60 dark:border-amber-800/40",
+    primary: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-violet-950/40 dark:to-indigo-950/40 border-orange-200/60 dark:border-violet-800/40",
+    accent: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-blue-950/40 dark:to-cyan-950/40 border-orange-200/60 dark:border-blue-800/40",
+    success: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-emerald-950/40 dark:to-teal-950/40 border-orange-200/60 dark:border-emerald-800/40",
+    warn: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-amber-950/40 dark:to-orange-950/40 border-orange-200/60 dark:border-amber-800/40",
   };
 
   const iconBgMap = {
@@ -70,16 +70,16 @@ function StatCard({
   };
 
   return (
-    <Card className={`group relative min-h-[140px] overflow-hidden rounded-3xl border border-slate-200/70 bg-white/95 p-0 shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80 ${bgMap[accent]}`}>
+    <Card className={`group relative min-h-[140px] overflow-hidden rounded-3xl border border-orange-200/70 bg-orange-50/95 p-0 shadow-lg transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80 ${bgMap[accent]}`}>
       <div className={`absolute inset-0 bg-gradient-to-br opacity-10 ${accentMap[accent]}`} />
 
       <CardContent className="relative flex h-full flex-col justify-between p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-[10px] font-semibold tracking-[0.32em] text-slate-500 dark:text-slate-400 uppercase">
+            <p className="text-[10px] font-semibold tracking-[0.32em] text-orange-700 dark:text-slate-400 uppercase">
               {label}
             </p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-orange-950 dark:text-white">
               {loading ? (
                 <span className="inline-block h-10 w-20 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-700" />
               ) : (
@@ -162,22 +162,31 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-4 pb-12 px-4 ">
+    <div className="space-y-4 pb-12 px-4 bg-orange-50 dark:bg-slate-950">
       <WelcomeDialog />
 
       {/* Header */}
-      <div className="mx-auto w-full max-w-full xl:max-w-[1200px] rounded-2xl  border border-slate-200/70 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/70">
+      <div className="mx-auto w-full max-w-full xl:max-w-[1200px] rounded-2xl  border border-orange-200/70 bg-orange-50/80 p-8 shadow-xl backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-950/70">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">
-              {isAdmin ? "Administration" : "Learning Management"}
-            </p>
-            <h1 className="mt-1 text-5xl font-semibold text-slate-950 dark:text-white">
-              Dashboard
+           
+            <h1 className="mt-1 text-5xl font-semibold text-orange-950 dark:text-white">
+              {isAdmin ? "Dashboard" : "Welcome to GLE Dashboard"}
             </h1>
-            <p className="mt-3 max-w-2xl  text-slate-600 dark:text-slate-400">
-              Your learning and platform overview, redesigned with cleaner cards and clearer hierarchy.
-            </p>
+            {isAdmin ? (
+              <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-400">
+                Your learning and platform overview, redesigned with cleaner cards and clearer hierarchy.
+              </p>
+            ) : (
+              <>
+                <p className="mt-3  font-medium text-orange-700 dark:text-slate-300">
+                  Your journey to success continues here. Every lesson, every assignment, every certificate brings you closer to where you want to be.
+                </p>
+                <p className="mt-3 max-w-2xl text-xs text-orange-700 dark:text-slate-400">
+                  "Small steps every day lead to big achievements." Open a course, complete a lesson, or just explore — every action counts. Let's go!
+                </p>
+              </>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -188,7 +197,7 @@ export default function Dashboard() {
               </Badge>
             )}
             {isAdmin && (
-              <Badge className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-500/30">
+              <Badge className="rounded-full bg-orange-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30">
                 Admin View
               </Badge>
             )}
@@ -200,12 +209,12 @@ export default function Dashboard() {
       {isAdmin && (
         <section className="space-y-6">
           <div className="flex items-center gap-4">
-            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Platform Overview</h2>
-              <p className="text-slate-500 dark:text-slate-400">Real-time platform statistics</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-orange-950 dark:text-white">Platform Overview</h2>
+              <p className="text-orange-700 dark:text-slate-400">Real-time platform statistics</p>
             </div>
           </div>
 
@@ -228,18 +237,18 @@ export default function Dashboard() {
       {!isAdmin && (
         <section className="space-y-6">
           <div className="flex items-center gap-4">
-            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Your Activity</h2>
-              <p className="text-slate-500 dark:text-slate-400">Overview of your learning journey</p>
+              <h2 className="text-3xl font-semibold tracking-tight text-orange-950 dark:text-white">Your Activity</h2>
+              <p className="text-orange-700 dark:text-slate-400">Overview of your learning journey</p>
             </div>
           </div>
 
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-            <StatCard label="Account Balance" value={`$${userDashboard?.balance ?? 0}`} icon={Wallet} accent="success" loading={userLoading} />
-            <StatCard label="Purchased Courses" value={userDashboard?.webinarsCount ?? 0} icon={BookOpen} accent="accent" loading={userLoading} />
+            {/* <StatCard label="Account Balance" value={`$${userDashboard?.balance ?? 0}`} icon={Wallet} accent="success" loading={userLoading} /> */}
+            <StatCard label="Your Programs " value={userDashboard?.webinarsCount ?? 0} icon={BookOpen} accent="accent" loading={userLoading} />
             <StatCard label="Support Messages" value={userDashboard?.supportsCount ?? 0} icon={MessageCircle} accent="primary" loading={userLoading} />
             <StatCard label="Scheduled Meetings" value={userDashboard?.reserveMeetingsCount ?? 0} icon={CalendarCheck2} accent="warn" loading={userLoading} />
             <StatCard label="Comments Posted" value={userDashboard?.commentsCount ?? 0} icon={MessageSquare} accent="primary" loading={userLoading} />
@@ -252,12 +261,12 @@ export default function Dashboard() {
         <section className="space-y-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Enrolled Courses</h2>
-                <p className="text-slate-500 dark:text-slate-400">Your active courses and progress</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-orange-950 dark:text-white">Enrolled Courses</h2>
+                <p className="text-orange-700 dark:text-slate-400">Your active courses and progress</p>
               </div>
             </div>
             <Badge variant="secondary" className="rounded-full px-6 py-2 text-sm font-semibold">
@@ -269,7 +278,7 @@ export default function Dashboard() {
             {courses.map((course) => (
               <Card
                 key={course.id}
-                className="group relative min-w-0 overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80"
+                className="group relative min-w-0 overflow-hidden rounded-3xl border border-orange-200/80 bg-orange-50/90 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl dark:border-slate-700/70 dark:bg-slate-950/80"
               >
                 {isEditMode && (
                   <div className="absolute right-4 top-4 z-10 flex items-center gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -282,7 +291,7 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <CardHeader className="space-y-4 border-b border-slate-200/80 px-7 pb-6 pt-7 dark:border-slate-700/70">
+                <CardHeader className="space-y-4 border-b border-orange-200/80 px-7 pb-6 pt-7 dark:border-slate-700/70">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className="font-mono text-xs tracking-widest text-slate-600 dark:text-slate-300">
                       {course.code}
@@ -291,40 +300,40 @@ export default function Dashboard() {
                       {course.grade ?? "In Progress"}
                     </Badge>
                   </div>
-                  <CardTitle className="text-2xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white">
+                  <CardTitle className="text-2xl font-semibold leading-tight tracking-tight text-orange-950 dark:text-white">
                     {course.title}
                   </CardTitle>
                 </CardHeader>
 
                 <CardContent className="space-y-7 px-7 pb-7 pt-6">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between text-sm text-orange-700 dark:text-slate-400">
                       <span>Progress</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{course.progress}%</span>
                     </div>
                     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-500 transition-all duration-700"
+                        className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 transition-all duration-700"
                         style={{ width: `${course.progress}%` }}
                       />
                     </div>
                   </div>
 
-                  <div className="grid gap-4 rounded-2xl border border-slate-200/70 bg-slate-50/90 p-5 text-sm dark:border-slate-700/70 dark:bg-slate-900/70">
+                  <div className="grid gap-4 rounded-2xl border border-orange-200/70 bg-orange-50/90 p-5 text-sm dark:border-slate-700/70 dark:bg-slate-900/70">
                     <div className="flex justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Instructor</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-200">{course.instructor ?? "TBA"}</span>
+                      <span className="text-orange-700 dark:text-slate-400">Instructor</span>
+                      <span className="font-medium text-orange-950 dark:text-slate-200">{course.instructor ?? "TBA"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500 dark:text-slate-400">Next Class</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-200">{course.next_class ?? "Not scheduled"}</span>
+                      <span className="text-orange-700 dark:text-slate-400">Next Class</span>
+                      <span className="font-medium text-orange-950 dark:text-slate-200">{course.next_class ?? "Not scheduled"}</span>
                     </div>
                   </div>
 
                   {!isEditMode ? (
                     <Button
                       onClick={() => navigate(`/courses/${course.id}`)}
-                      className="w-full rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 py-6 text-base font-semibold text-white shadow-xl shadow-violet-500/30 transition-all hover:from-violet-700 hover:to-indigo-700"
+                      className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 py-6 text-base font-semibold text-white shadow-xl shadow-orange-500/30 transition-all hover:from-orange-600 hover:to-orange-700"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <PlayCircle className="h-6 w-6" />
@@ -364,12 +373,12 @@ export default function Dashboard() {
         <section className="space-y-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                 <Bell className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Noticeboard</h2>
-                <p className="text-slate-500 dark:text-slate-400">Stay updated with important announcements</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-orange-950 dark:text-white">Noticeboard</h2>
+                <p className="text-orange-700 dark:text-slate-400">Stay updated with important announcements</p>
               </div>
             </div>
             <Badge className="rounded-full bg-amber-500 px-6 py-2 text-sm font-semibold text-white shadow-lg">
@@ -386,7 +395,7 @@ export default function Dashboard() {
                   </h4>
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{notice.message}</p>
                   {notice.created_at && (
-                    <div className="mt-6 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="mt-6 flex items-center gap-2 text-xs text-orange-700 dark:text-slate-400">
                       <Clock className="h-4 w-4" />
                       {new Date(Number(notice.created_at) * 1000).toLocaleDateString('en-US', { 
                         year: 'numeric', 

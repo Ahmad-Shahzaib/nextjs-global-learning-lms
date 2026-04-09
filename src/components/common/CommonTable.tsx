@@ -44,14 +44,14 @@ function CommonTable<T>({
   };
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-      <Table className="min-w-full divide-y divide-gray-200">
-        <TableHeader className="bg-gray-50">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
+      <Table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+        <TableHeader className="bg-gray-50 dark:bg-slate-900">
           <TableRow>
             {columns.map((col, idx) => (
               <TableHead
                 key={idx}
-                className={`px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider ${col.className}`}
+                className={`px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider dark:text-slate-100 ${col.className}`}
               >
                 {col.header}
               </TableHead>
@@ -59,10 +59,10 @@ function CommonTable<T>({
           </TableRow>
         </TableHeader>
 
-        <TableBody className="bg-white divide-y divide-gray-100">
+        <TableBody className="bg-white divide-y divide-gray-100 dark:bg-slate-950 dark:divide-slate-800">
           {loading ? (
             Array.from({ length: skeletonRows }).map((_, rowIdx) => (
-              <TableRow key={rowIdx} className="hover:bg-gray-50 transition-colors">
+              <TableRow key={rowIdx} className="hover:bg-gray-50 transition-colors dark:hover:bg-slate-900">
                 {columns.map((_, colIdx) => (
                   <TableCell key={colIdx} className="px-4 py-3">
                     <Skeleton className="h-4 w-full rounded-md" />
@@ -74,7 +74,7 @@ function CommonTable<T>({
             <TableRow>
               <TableCell
                 colSpan={columns.length}
-                className="py-10 text-center text-gray-400 italic"
+                className="py-10 text-center text-gray-400 italic dark:text-slate-400"
               >
                 {emptyMessage}
               </TableCell>
@@ -83,12 +83,12 @@ function CommonTable<T>({
             data.map((row, rowIdx) => (
               <TableRow
                 key={rowKey ? rowKey(row, rowIdx) : rowIdx}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors dark:hover:bg-slate-900"
               >
                 {columns.map((col, colIdx) => (
                   <TableCell
                     key={colIdx}
-                    className={`px-4 py-3 text-sm text-gray-700 ${col.className}`}
+                    className={`px-4 py-3 text-sm text-gray-700 dark:text-slate-100 ${col.className}`}
                   >
                     {getCellValue(row, col.accessor, rowIdx)}
                   </TableCell>

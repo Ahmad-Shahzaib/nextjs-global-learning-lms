@@ -107,15 +107,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     : `${rightSidebarOpen ? "w-80" : "w-0"} relative`;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-orange-50 dark:bg-background flex flex-col">
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/50 bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-card/80 shadow-lg">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-orange-100/70 bg-orange-50/95 dark:border-border/50 dark:bg-card/95 backdrop-blur-xl supports-[backdrop-filter]:bg-orange-50/80 dark:supports-[backdrop-filter]:bg-card/80 shadow-lg">
         <div className="flex h-16 items-center gap-4 px-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-            className="hover:bg-primary/20 hover:text-primary transition-all duration-300"
+            className="hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary"
             aria-label="Toggle navigation menu"
           >
             {leftSidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -128,10 +128,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             
             <div className="hidden md:flex flex-1 max-w-md">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-orange-400 dark:text-muted-foreground" />
                 <Input
                   placeholder="Search courses, assignments..."
-                  className="pl-10 bg-muted/50 border-border/50 focus:border-primary transition-all duration-300"
+                  className="pl-10 bg-orange-50 border-orange-100 focus:border-orange-500 transition-all duration-300 dark:bg-muted/50 dark:border-border/50 dark:focus:border-primary"
                   aria-label="Search"
                 />
               </div>
@@ -144,7 +144,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="hover:bg-primary/20 hover:text-primary transition-all duration-300"
+              className="hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary"
               aria-label="Toggle theme"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -159,7 +159,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="hover:bg-primary/20 hover:text-primary transition-all duration-300 relative"
+                  className="hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary relative"
                   aria-label="Settings"
                 >
                   <Settings className="h-5 w-5" />
@@ -224,24 +224,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex flex-1 overflow-hidden relative pt-16">
         {/* Left Sidebar */}
         <aside
-          className={`transition-all duration-300 ease-smooth overflow-y-auto hide-scrollbar h-[calc(100vh-4rem)] border-r border-border/50 bg-sidebar shadow-2xl z-40 ${leftSidebarClasses}`}
+          className={`transition-all duration-300 ease-smooth overflow-y-auto hide-scrollbar h-[calc(100vh-4rem)] border-r border-orange-100/70 bg-orange-50/20 shadow-2xl z-40 dark:border-border/50 dark:bg-sidebar ${leftSidebarClasses}`}
           aria-label="Main navigation"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           <LeftSidebar />
           {/* Decorative gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-100/60 to-transparent pointer-events-none dark:from-primary/5" />
         </aside>
 
         {/* Main Content */}
         <main
-          className="flex-1 overflow-y-auto hide-scrollbar p-3 md:p-4 lg:p-4 relative h-[calc(100vh-4rem)] bg-sidebar"
+          className="flex-1 overflow-y-auto hide-scrollbar p-3 md:p-4 lg:p-4 relative h-[calc(100vh-4rem)] bg-orange-50/10 dark:bg-sidebar"
           style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           {/* Background decorative elements */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: "1s" }} />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100/40 rounded-full blur-3xl animate-pulse-glow dark:bg-primary/10" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-200/40 rounded-full blur-3xl animate-pulse-glow dark:bg-accent/10" style={{ animationDelay: "1s" }} />
           </div>
           <div className="relative z-10">
             {children}
@@ -263,7 +263,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Overlay for mobile when sidebars are open */}
         {isMobile && (leftSidebarOpen || rightSidebarOpen) && (
           <div 
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30"
+            className="fixed inset-0 bg-orange-50/80 dark:bg-background/80 backdrop-blur-sm z-30"
             onClick={() => {
               setLeftSidebarOpen(false);
               setRightSidebarOpen(false);

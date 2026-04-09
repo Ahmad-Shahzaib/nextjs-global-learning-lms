@@ -43,18 +43,18 @@ function getCategoryStyle(cat?: string) {
 /* ─── skeleton card ───────────────────────────────────── */
 function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm animate-pulse">
-      <div className="h-36 bg-gradient-to-br from-gray-50 to-gray-100" />
+    <div className="overflow-hidden rounded-xl border border-orange-100 bg-orange-50 shadow-sm animate-pulse dark:border-slate-800 dark:bg-slate-950">
+      <div className="h-36 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-slate-900 dark:to-slate-950" />
       <div className="space-y-3 p-4">
-        <div className="h-2.5 w-20 rounded-full bg-gray-200" />
-        <div className="h-5 w-3/4 rounded-lg bg-gray-200" />
+        <div className="h-2.5 w-20 rounded-full bg-orange-200 dark:bg-slate-700" />
+        <div className="h-5 w-3/4 rounded-lg bg-orange-200 dark:bg-slate-700" />
         <div className="grid gap-2 grid-cols-2">
-          <div className="h-12 rounded-lg bg-gray-200" />
-          <div className="h-12 rounded-lg bg-gray-200" />
-          <div className="h-12 rounded-lg bg-gray-200" />
-          <div className="h-12 rounded-lg bg-gray-200" />
+          <div className="h-12 rounded-lg bg-orange-200 dark:bg-slate-700" />
+          <div className="h-12 rounded-lg bg-orange-200 dark:bg-slate-700" />
+          <div className="h-12 rounded-lg bg-orange-200 dark:bg-slate-700" />
+          <div className="h-12 rounded-lg bg-orange-200 dark:bg-slate-700" />
         </div>
-        <div className="h-9 rounded-lg bg-gray-200" />
+        <div className="h-9 rounded-lg bg-orange-200 dark:bg-slate-700" />
       </div>
     </div>
   );
@@ -90,10 +90,10 @@ function CourseCard({
   const price = course.price ? course.price : "Free";
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-orange-100 bg-orange-50 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:hover:shadow-slate-900/40">
 
       {/* ── image / cover ── */}
-      <div className="relative h-36 w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="relative h-36 w-full overflow-hidden bg-gradient-to-br from-orange-50 to-orange-100 dark:from-slate-900 dark:to-slate-950">
         {coverImage ? (
           <img
             src={coverImage}
@@ -102,7 +102,7 @@ function CourseCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <GraduationCap className="h-12 w-12 text-gray-300" />
+            <GraduationCap className="h-12 w-12 text-orange-400" />
           </div>
         )}
 
@@ -119,40 +119,40 @@ function CourseCard({
       </div>
 
       {/* ── body ── */}
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-3 p-4 text-orange-950 dark:text-slate-100">
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-orange-700 dark:text-slate-400">
             {courseCode}
           </p>
-          <h3 className="text-sm font-semibold text-gray-900">
+          <h3 className="text-sm font-semibold text-orange-950 dark:text-slate-100">
             {course.title}
           </h3>
         </div>
 
-        <div className="grid gap-2 text-xs text-gray-600 grid-cols-3">
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Duration</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{course.duration || "N/A"}</p>
+        <div className="grid gap-2 text-xs grid-cols-3">
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Duration</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{course.duration || "N/A"}</p>
           </div>
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Instructor</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{instructor}</p>
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Instructor</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{instructor}</p>
           </div>
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Progress</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{progress != null ? `${progress}%` : "N/A"}</p>
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Progress</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{progress != null ? `${progress}%` : "N/A"}</p>
           </div>
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Access</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{accessDays}</p>
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Access</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{accessDays}</p>
           </div>
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Purchased</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{purchasedAt}</p>
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Purchased</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{purchasedAt}</p>
           </div>
-          <div className="bg-gray-50/90 p-2 rounded-lg">
-            <p className="text-[8px] uppercase tracking-[0.24em] text-gray-400">Price</p>
-            <p className="mt-0.5 text-xs font-semibold text-gray-800">{price}</p>
+          <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-slate-900/90">
+            <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-slate-400">Price</p>
+            <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-slate-100">{price}</p>
           </div>
         </div>
 
@@ -299,10 +299,10 @@ export default function Courses() {
 
   /* ── JSX ── */
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12  text-orange-950 dark:text-slate-100">
 
       {/* ── Page hero header ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 px-8 py-8 shadow-lg shadow-orange-200">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-400 px-8 py-8 shadow-lg shadow-orange-200 dark:shadow-orange-900/30">
         {/* decorative circles */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-8 right-24 h-32 w-32 rounded-full bg-white/10" />
@@ -330,13 +330,13 @@ export default function Courses() {
           {isAdmin && (
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-orange-600 shadow-md transition-all duration-200 hover:bg-orange-50 hover:shadow-lg active:scale-95">
+                <button className="flex items-center gap-2 rounded-xl bg-orange-100 px-5 py-2.5 text-sm font-bold text-orange-700 shadow-md transition-all duration-200 hover:bg-orange-200 hover:shadow-lg active:scale-95">
                   <Plus className="h-4 w-4" />
                   Add New Course
                 </button>
               </DialogTrigger>
 
-              <DialogContent className="rounded-2xl border border-orange-100 p-0 overflow-hidden">
+              <DialogContent className="rounded-2xl border border-orange-100 p-0 overflow-hidden dark:border-slate-700 dark:bg-slate-950">
                 {/* dialog header */}
                 <div className="bg-gradient-to-r from-orange-500 to-amber-400 px-6 py-4">
                   <DialogTitle className="text-lg font-bold text-white">Add New Course</DialogTitle>
@@ -349,25 +349,25 @@ export default function Courses() {
                     <Input
                       value={newCourse.title}
                       onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
-                      className="rounded-xl border-orange-100 focus-visible:ring-orange-400"
+                      className="rounded-xl border-orange-100 bg-orange-50 text-orange-950 focus-visible:ring-orange-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       placeholder="e.g. Introduction to Data Science"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500">Duration *</Label>
+                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Duration *</Label>
                     <Input
                       value={newCourse.duration}
                       onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })}
-                      className="rounded-xl border-orange-100 focus-visible:ring-orange-400"
+                      className="rounded-xl border-orange-100 bg-orange-50 text-orange-950 focus-visible:ring-orange-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       placeholder="e.g. 3 Years, 6 Months"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500">Program Category *</Label>
+                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Program Category *</Label>
                     <Select value={newCourse.category} onValueChange={(val) => setNewCourse({ ...newCourse, category: val })}>
-                      <SelectTrigger className="rounded-xl border-orange-100 focus:ring-orange-400">
+                      <SelectTrigger className="rounded-xl border-orange-100 bg-orange-50 text-orange-950 focus:ring-orange-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl">
@@ -379,28 +379,28 @@ export default function Courses() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500">Course Code <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
+                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Course Code <span className="normal-case font-normal text-slate-400 dark:text-slate-500">(optional)</span></Label>
                     <Input
                       value={newCourse.code}
                       onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value })}
-                      className="rounded-xl border-orange-100 focus-visible:ring-orange-400"
+                      className="rounded-xl border-orange-100 bg-orange-50 text-orange-950 focus-visible:ring-orange-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       placeholder="e.g. CS-101"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500">Attachments <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
+                    <Label className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Attachments <span className="normal-case font-normal text-slate-400 dark:text-slate-500">(optional)</span></Label>
                     <Input
                       type="file"
                       multiple
                       onChange={(e) => setAttachments(Array.from(e.target.files || []))}
-                      className="rounded-xl border-orange-100 text-sm"
+                      className="rounded-xl border-orange-100 bg-orange-50 text-sm text-orange-950 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
                   </div>
 
                   <button
                     onClick={handleAddCourse}
-                    className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-400 py-2.5 text-sm font-bold text-white shadow-sm shadow-orange-200 transition-all hover:from-orange-600 hover:to-amber-500 hover:shadow-md active:scale-95"
+                    className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-amber-400 py-2.5 text-sm font-bold text-white shadow-sm shadow-orange-200 transition-all hover:from-orange-600 hover:to-amber-500 hover:shadow-md dark:shadow-orange-900/30 active:scale-95"
                   >
                     Create Course
                   </button>
@@ -420,13 +420,13 @@ export default function Courses() {
             placeholder="Search by title, code or category…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-orange-100 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 shadow-sm outline-none transition-all focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
+            className="w-full rounded-xl border border-orange-100 bg-orange-50 py-2.5 pl-10 pr-4 text-sm text-orange-950 placeholder:text-orange-500 shadow-sm outline-none transition-all focus:border-orange-300 focus:ring-2 focus:ring-orange-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-orange-300 dark:focus:ring-orange-200"
           />
         </div>
 
         {/* result count pill */}
         {!isLoading && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-600 dark:border-orange-900/30 dark:bg-orange-500/10 dark:text-orange-300">
             <LayoutGrid className="h-3.5 w-3.5" />
             {filteredCourses.length} result{filteredCourses.length !== 1 ? "s" : ""}
           </span>
@@ -453,12 +453,12 @@ export default function Courses() {
 
         {/* empty state */}
         {!isLoading && filteredCourses.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/40 py-20 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100">
-              <BookOpen className="h-8 w-8 text-gray-400" />
+          <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/60 py-20 text-center dark:border-slate-800 dark:bg-slate-950/80">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-orange-100 dark:bg-slate-900">
+              <BookOpen className="h-8 w-8 text-orange-500 dark:text-slate-400" />
             </div>
-            <h3 className="text-lg font-bold text-gray-700">No courses found</h3>
-            <p className="mt-1 max-w-xs text-sm text-gray-400">
+            <h3 className="text-lg font-bold text-orange-950 dark:text-slate-100">No courses found</h3>
+            <p className="mt-1 max-w-xs text-sm text-orange-700 dark:text-slate-400">
               {isAdmin
                 ? 'Click "Add New Course" to publish your first course.'
                 : "You haven't been enrolled in any courses yet."}

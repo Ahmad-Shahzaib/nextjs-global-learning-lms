@@ -261,22 +261,22 @@ export default function Profile() {
   }
 
   return (
-    <div className="container max-w-4xl">
-      <Card className="border-border/50 shadow-lg">
+    <div className="container max-w-7xl">
+      <Card className="border-orange-100/70 bg-orange-50/90 shadow-lg dark:border-border/50 dark:bg-slate-950">
         <CardHeader>
-          <CardTitle className="text-2xl bg-gradient-accent bg-clip-text text-transparent">
+          <CardTitle className="text-2xl text-orange-950 dark:text-white">
             Profile Settings
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-orange-700 dark:text-slate-400">
             Manage your account information and preferences
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32 border-4 border-primary/20">
+            <Avatar className="h-32 w-32 border-4 border-orange-200/50">
               <AvatarImage src={avatarUrl} alt={fullName || "User"} />
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+              <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl">
                 {fullName ? fullName.charAt(0).toUpperCase() : <User className="h-12 w-12" />}
               </AvatarFallback>
             </Avatar>
@@ -323,7 +323,7 @@ export default function Profile() {
                 type="text"
                 value={userId}
                 disabled
-                className="bg-muted/50"
+                className="bg-orange-50 border-orange-100 text-orange-950"
               />
               <p className="text-xs text-muted-foreground">
                 Your unique user identifier assigned by the administrator.
@@ -338,6 +338,7 @@ export default function Profile() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                className="bg-orange-50 border-orange-100 text-orange-950"
               />
               <p className="text-xs text-muted-foreground">
                 You can edit your email address here.
@@ -352,6 +353,7 @@ export default function Profile() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
+                className="bg-orange-50 border-orange-100 text-orange-950"
               />
               <p className="text-xs text-muted-foreground">
                 You can edit your name.
@@ -366,6 +368,7 @@ export default function Profile() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself"
+                className="bg-orange-50 border-orange-100 text-orange-950"
               />
               <p className="text-xs text-muted-foreground">
                 A short biography shown on your profile.
@@ -379,7 +382,7 @@ export default function Profile() {
                   id="timezone"
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2"
+                  className="w-full rounded-md border border-orange-100 bg-orange-50 px-3 py-2 text-orange-950"
                 >
                   <option value="UTC">UTC</option>
                   <option value="GMT">GMT</option>
@@ -393,7 +396,7 @@ export default function Profile() {
                   id="language"
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2"
+                  className="w-full rounded-md border border-orange-100 bg-orange-50 px-3 py-2 text-orange-950"
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -423,7 +426,7 @@ export default function Profile() {
                 type="password"
                 value="••••••••"
                 disabled
-                className="bg-muted/50"
+                className="bg-orange-50 border-orange-100 text-orange-950"
               />
               <p className="text-xs text-muted-foreground">
                 Contact administrator to reset your password.
@@ -431,7 +434,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="space-y-2 border rounded-lg p-4 bg-muted/20">
+          <div className="space-y-2 border border-orange-100 rounded-lg p-4 bg-orange-50/60 dark:bg-muted/20">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold">ID Document</p>
@@ -446,10 +449,10 @@ export default function Profile() {
                       value={selectedUserForIdUpload}
                       onValueChange={setSelectedUserForIdUpload}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full bg-orange-50 border-orange-100 text-orange-950">
                         <SelectValue placeholder="Select student" />
                       </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-orange-50 text-orange-950">
                       {users.map((u) => (
                         <SelectItem key={u.id} value={u.id}>
                           {u.full_name || u.email || u.user_code || "Unknown user"}
@@ -508,7 +511,7 @@ export default function Profile() {
                 href={resolvedIdDocumentUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-primary text-sm underline"
+                className="text-orange-700 text-sm underline"
               >
                 View uploaded ID document
               </a>
