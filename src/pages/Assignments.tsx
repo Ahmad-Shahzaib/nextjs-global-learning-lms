@@ -277,7 +277,7 @@ const Assignments = () => {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in bg-orange-50 dark:bg-[#0f0d0b] text-slate-900 dark:text-[#f5efe8]">
+    <div className="space-y-6 p-4 rounded-lg animate-fade-in bg-orange-50 dark:bg-[#0f0d0b] text-slate-900 dark:text-[#f5efe8]">
       <Card className="shadow-lg border-orange-200 bg-orange-50 dark:border-[#2e2218] dark:bg-[#1a1410]">
         <CardHeader>
           <CardTitle className="text-orange-950 dark:text-[#f5efe8]">My Assignments</CardTitle>
