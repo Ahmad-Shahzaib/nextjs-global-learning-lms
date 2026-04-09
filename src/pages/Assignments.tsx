@@ -57,7 +57,6 @@ const Assignments = () => {
     sendMessageSuccess,
   } = useSelector((state: RootState) => state.assignments);
 
-
   useEffect(() => {
     dispatch(fetchMyAssignments() as any);
   }, [dispatch]);
@@ -92,10 +91,7 @@ const Assignments = () => {
 
   const handleSendMessage = async () => {
     if (!activeAssignmentId) return;
-
-    if (!messageText.trim()) {
-      return;
-    }
+    if (!messageText.trim()) return;
 
     await dispatch(
       sendAssignmentMessage({
@@ -168,62 +164,68 @@ const Assignments = () => {
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-            <h3 className="text-sm font-semibold text-orange-800 dark:text-slate-100">Assignment Info</h3>
+          <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-[#2e2218] dark:bg-[#1a1410]">
+            <h3 className="text-sm font-semibold text-orange-800 dark:text-[#f5efe8]">Assignment Info</h3>
             <dl className="mt-2 space-y-2 text-sm">
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Title</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{selectedAssignment.title || "(No title)"}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Title</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{selectedAssignment.title || "(No title)"}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Webinar</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{selectedAssignment.webinar_title || "-"}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Webinar</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{selectedAssignment.webinar_title || "-"}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Student</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{selectedAssignment.student?.full_name || "-"}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Student</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{selectedAssignment.student?.full_name || "-"}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Status</dt>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Status</dt>
                 <dd>
-                  <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
+                  <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                     {selectedAssignment.user_status || "-"}
                   </span>
                 </dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Deadline</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{deadlineText}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Deadline</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{deadlineText}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-            <h3 className="text-sm font-semibold text-orange-800 dark:text-slate-100">Progress & Permissions</h3>
+          <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-[#2e2218] dark:bg-[#1a1410]">
+            <h3 className="text-sm font-semibold text-orange-800 dark:text-[#f5efe8]">Progress & Permissions</h3>
             <dl className="mt-2 space-y-2 text-sm">
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Attempts</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{selectedAssignment.used_attempts_count ?? 0}/{selectedAssignment.attempts ?? 0}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Attempts</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">
+                  {selectedAssignment.used_attempts_count ?? 0}/{selectedAssignment.attempts ?? 0}
+                </dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Grade</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{selectedAssignment.grade ?? "-"} / {selectedAssignment.total_grade ?? "-"}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Grade</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">
+                  {selectedAssignment.grade ?? "-"} / {selectedAssignment.total_grade ?? "-"}
+                </dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Can send message</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{formatBadge(selectedAssignment.can?.send_message)}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Can send message</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{formatBadge(selectedAssignment.can?.send_message)}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-slate-400">Can view error</dt>
-                <dd className="text-right text-slate-900 dark:text-slate-100">{formatBadge(selectedAssignment.can_view_error)}</dd>
+                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Can view error</dt>
+                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{formatBadge(selectedAssignment.can_view_error)}</dd>
               </div>
             </dl>
           </div>
         </div>
 
-        <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-          <h3 className="text-sm font-semibold text-orange-800 dark:text-slate-100">Description</h3>
-          <p className="mt-2 text-sm text-orange-600 dark:text-slate-400">{selectedAssignment.description || "No description available."}</p>
+        <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-[#2e2218] dark:bg-[#1a1410]">
+          <h3 className="text-sm font-semibold text-orange-800 dark:text-[#f5efe8]">Description</h3>
+          <p className="mt-2 text-sm text-orange-600 dark:text-[#a89880]">
+            {selectedAssignment.description || "No description available."}
+          </p>
         </div>
       </div>
     );
@@ -272,36 +274,28 @@ const Assignments = () => {
         </div>
       ),
     },
-
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in text-slate-900 dark:text-slate-100">
-      <Card className="shadow-lg border-orange-200 bg-orange-50 dark:border-slate-700 dark:bg-slate-950">
+    <div className="space-y-6 animate-fade-in bg-orange-50 dark:bg-[#0f0d0b] text-slate-900 dark:text-[#f5efe8]">
+      <Card className="shadow-lg border-orange-200 bg-orange-50 dark:border-[#2e2218] dark:bg-[#1a1410]">
         <CardHeader>
-          <CardTitle>My Assignments</CardTitle>
+          <CardTitle className="text-orange-950 dark:text-[#f5efe8]">My Assignments</CardTitle>
         </CardHeader>
 
         <CardContent>
-          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm dark:border-[#2e2218] dark:bg-[#1a1410] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1 min-w-0">
-              <label className="mb-1 block text-sm font-medium text-orange-700 dark:text-slate-300">
+              <label className="mb-1 block text-sm font-medium text-orange-700 dark:text-orange-500">
                 Search assignments
               </label>
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by title, webinar, student, or status"
-                className="w-full rounded-md border border-orange-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500"
+                className="w-full rounded-md border border-orange-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-orange-500 focus:outline-none dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8] dark:placeholder:text-orange-500"
               />
             </div>
-
-            {/* <div className="flex items-center justify-between gap-3 text-sm text-slate-600 sm:justify-end">
-              <p className="whitespace-nowrap">
-                {filteredItems.length} assignment{filteredItems.length === 1 ? "" : "s"} 
-              </p>
-             
-            </div> */}
           </div>
 
           {error && !loading && (
@@ -316,36 +310,37 @@ const Assignments = () => {
             rowKey={(row) => row.id}
             skeletonRows={5}
           />
-          
         </CardContent>
-         <div className="flex items-center gap-2 rounded-b-xl border-t border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </Button>
-                <span className="text-sm font-medium">
-                  {currentPage} / {pageCount}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
-                  disabled={currentPage === pageCount}
-                >
-                  Next
-                </Button>
-              </div>
+
+        <div className="flex items-center gap-2 rounded-b-xl border-t border-orange-200 bg-orange-50 p-3 dark:border-[#2e2218] dark:bg-[#1a1410]">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm font-medium text-orange-950 dark:text-[#f5efe8]">
+            {currentPage} / {pageCount}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
+            disabled={currentPage === pageCount}
+          >
+            Next
+          </Button>
+        </div>
       </Card>
 
+      {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="dark:bg-slate-950 dark:text-slate-100">
+        <DialogContent className="dark:bg-[#1a1410] dark:text-[#f5efe8] dark:border-[#2e2218]">
           <DialogHeader>
-            <DialogTitle>Assignment Details</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="dark:text-[#f5efe8]">Assignment Details</DialogTitle>
+            <DialogDescription className="dark:text-[#a89880]">
               View detailed assignment data.
             </DialogDescription>
           </DialogHeader>
@@ -363,37 +358,44 @@ const Assignments = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Send Message Dialog */}
       <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
-        <DialogContent className="dark:bg-slate-950 dark:text-slate-100">
+        <DialogContent className="dark:bg-[#1a1410] dark:text-[#f5efe8] dark:border-[#2e2218]">
           <DialogHeader>
-            <DialogTitle>Send Assignment Message</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="dark:text-[#f5efe8]">Send Assignment Message</DialogTitle>
+            <DialogDescription className="dark:text-[#a89880]">
               Send a message related to this assignment with optional file attachment.
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-4 space-y-4">
             {activeAssignmentId ? (
-              <p className="text-xs text-muted-foreground">Assignment ID: {activeAssignmentId}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-500">
+                Assignment ID: {activeAssignmentId}
+              </p>
             ) : null}
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">Message</label>
+              <label className="block text-sm font-medium text-slate-600 dark:text-[#a89880]">
+                Message
+              </label>
               <textarea
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                className="mt-1 w-full rounded-md border border-orange-200 bg-white px-3 py-2 text-sm focus:border-orange-500 focus:outline-none dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8] dark:placeholder:text-orange-500"
                 rows={4}
                 placeholder="Type your message..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300">File</label>
+              <label className="block text-sm font-medium text-slate-600 dark:text-[#a89880]">
+                File (optional)
+              </label>
               <input
                 type="file"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="mt-1 w-full text-sm text-slate-900 dark:text-slate-100"
+                className="mt-1 w-full text-sm text-slate-900 dark:text-[#f5efe8]"
               />
             </div>
 
@@ -401,7 +403,7 @@ const Assignments = () => {
               <p className="text-sm text-destructive">{sendMessageError}</p>
             )}
             {sendMessageSuccess && (
-              <p className="text-sm text-emerald-600">{sendMessageSuccess}</p>
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">{sendMessageSuccess}</p>
             )}
 
             <DialogFooter className="mt-4 flex justify-end space-x-2">

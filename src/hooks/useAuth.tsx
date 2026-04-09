@@ -35,13 +35,53 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const STORAGE_USER = "auth:user";
 const STORAGE_ROLES = "auth:roles";
 
+function readCachedSession(): { user: ApiUser | null; roles: string[] } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const rawUser = localStorage.getItem(STORAGE_USER);
+    const rawRoles = localStorage.getItem(STORAGE_ROLES);
+    const user = rawUser ? (JSON.parse(rawUser) as ApiUser) : null;
+    const roles = rawRoles ? (JSON.parse(rawRoles) as string[]) : [];
+    return { user, roles };
+  } catch {
+    return null;
+  }
+}
+
+function normalizeApiUser(raw: any): ApiUser | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const candidate = raw.user ?? raw.data?.user ?? raw;
+  if (!candidate || typeof candidate !== "object") return null;
+
+  const profiles = candidate.profiles;
+  const id = candidate.id ?? profiles?.id;
+  const email = candidate.email ?? profiles?.email;
+  const full_name = candidate.full_name ?? profiles?.full_name;
+  const avatar_url = candidate.avatar_url ?? profiles?.avatar_url;
+  const is_blocked = candidate.is_blocked ?? profiles?.is_blocked;
+  const user_code = candidate.user_code ?? profiles?.user_code;
+
+  if (!id || !email) return null;
+
+  return {
+    id: String(id),
+    email: String(email),
+    full_name: typeof full_name === "string" ? full_name : undefined,
+    avatar_url: typeof avatar_url === "string" ? avatar_url : undefined,
+    is_blocked: typeof is_blocked === "boolean" ? is_blocked : undefined,
+    user_code: typeof user_code === "string" ? user_code : undefined,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<ApiUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>("idle");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAccounts, setIsAccounts] = useState(false);
-  const [isTeacher, setIsTeacher] = useState(false);
-  const [roles, setRoles] = useState<string[]>([]);
+  const cachedSession = readCachedSession();
+  const [user, setUser] = useState<ApiUser | null>(cachedSession?.user ?? null);
+  const [status, setStatus] = useState<AuthStatus>(cachedSession?.user ? "authenticated" : "idle");
+  const [isAdmin, setIsAdmin] = useState(Boolean(cachedSession?.roles?.includes("admin")));
+  const [isAccounts, setIsAccounts] = useState(Boolean(cachedSession?.roles?.includes("accounts")));
+  const [isTeacher, setIsTeacher] = useState(Boolean(cachedSession?.roles?.includes("teacher")));
+  const [roles, setRoles] = useState<string[]>(cachedSession?.roles ?? []);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -148,11 +188,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const refreshPromise = (async () => {
         try {
-          const res = await apiFetch<{ user?: ApiUser; roles?: string[] }>("/auth/me", {
+          const res = await apiFetch<any>("/auth/me", {
             timeoutMs: 6000,
           });
           const roles = Array.isArray(res?.roles) ? res.roles : [];
-          const apiUser = res?.user ?? null;
+          const apiUser = normalizeApiUser(res) ?? null;
 
           if (!apiUser) {
             throw new ApiError("Unauthorized", 401);

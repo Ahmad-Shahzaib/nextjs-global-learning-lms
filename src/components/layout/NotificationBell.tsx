@@ -71,14 +71,14 @@ export function NotificationBell() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-80 bg-orange-50 dark:bg-card">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           {unreadCount > 0 && (
             <Badge variant="secondary">{unreadCount} new</Badge>
           )}
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto ">
           {loading ? (
             <div className="p-4 text-center text-muted-foreground">Loading...</div>
           ) : error ? (

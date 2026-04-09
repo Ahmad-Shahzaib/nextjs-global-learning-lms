@@ -106,6 +106,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       }`
     : `${rightSidebarOpen ? "w-80" : "w-0"} relative`;
 
+  const profileLabel = user?.full_name || user?.email || "Profile";
+
   return (
     <div className="min-h-screen bg-orange-50 dark:bg-background flex flex-col">
       {/* Top Header */}
@@ -159,7 +161,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary relative"
+                  className=" hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary relative"
                   aria-label="Settings"
                 >
                   <Settings className="h-5 w-5" />
@@ -168,7 +170,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-72 max-w-[90vw] bg-orange-50 border-orange-100 dark:bg-card dark:border-border">
                 <DropdownMenuLabel className="flex flex-col gap-1">
                   <span>Settings</span>
                   <div className="flex items-center gap-2">
@@ -195,9 +197,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     <DropdownMenuSeparator />
                   </>
                 )}
-                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
+                <DropdownMenuItem className="cursor-pointer break-words" onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile: {user?.email}</span>
+                  <span className="whitespace-normal break-words">{profileLabel}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">

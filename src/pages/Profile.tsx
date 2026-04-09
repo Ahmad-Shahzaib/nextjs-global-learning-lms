@@ -66,7 +66,6 @@ export default function Profile() {
       setIdDocumentUrl(profile.identity_scan || "");
       setUserId(String(profile.id || ""));
     } else if (user) {
-      // Fallback for context-backed auth before profile loads
       setFullName(user.full_name || "");
       setEmail(user.email || "");
       setAvatarUrl((user as any).avatar_url || "");
@@ -91,25 +90,6 @@ export default function Profile() {
       void loadUsers();
     }
   }, [isAdmin, user]);
-
-
-  const loadProfile = async () => {
-    try {
-      // use current auth user data for initial state
-      setFullName(user?.full_name || "");
-      const url = user?.avatar_url || "";
-      setAvatarUrl(url);
-      setIdDocumentUrl((user as any)?.id_document_url || "");
-      try {
-        if (url) localStorage.setItem("avatar_url", url);
-      } catch {
-        // ignore
-      }
-      setUserId(user?.user_code || "Not assigned");
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    }
-  };
 
   const loadUsers = async () => {
     try {
@@ -167,16 +147,16 @@ export default function Profile() {
         return;
       }
 
-    const targetUserId =
-      (isAdmin ? selectedUserForIdUpload : user?.id) || user?.id || "";
-    if (!targetUserId) {
-      toast.error("Select a user before uploading an ID document");
-      return;
-    }
-    const file = event.target.files[0];
-    const form = new FormData();
-    form.append("id_document", file);
-    form.append("user_id", targetUserId);
+      const targetUserId =
+        (isAdmin ? selectedUserForIdUpload : user?.id) || user?.id || "";
+      if (!targetUserId) {
+        toast.error("Select a user before uploading an ID document");
+        return;
+      }
+      const file = event.target.files[0];
+      const form = new FormData();
+      form.append("id_document", file);
+      form.append("user_id", targetUserId);
       const res = await apiFetch<{ id_document_url: string }>("/profile/id-document", {
         method: "POST",
         body: form,
@@ -261,22 +241,22 @@ export default function Profile() {
   }
 
   return (
-    <div className="container max-w-7xl">
-      <Card className="border-orange-100/70 bg-orange-50/90 shadow-lg dark:border-border/50 dark:bg-slate-950">
+    <div className="container p-6 rounded-lg max-w-7xl bg-orange-50 dark:bg-[#0f0d0b] text-slate-900 dark:text-[#f5efe8]">
+      <Card className="border-orange-200 bg-orange-50 shadow-lg dark:border-[#2e2218] dark:bg-[#1a1410]">
         <CardHeader>
-          <CardTitle className="text-2xl text-orange-950 dark:text-white">
+          <CardTitle className="text-2xl text-orange-950 dark:text-[#f5efe8]">
             Profile Settings
           </CardTitle>
-          <CardDescription className="text-orange-700 dark:text-slate-400">
+          <CardDescription className="text-orange-700 dark:text-[#a89880]">
             Manage your account information and preferences
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-32 w-32 border-4 border-orange-200/50">
+            <Avatar className="h-32 w-32 border-4 border-orange-200 dark:border-[#2e2218]">
               <AvatarImage src={avatarUrl} alt={fullName || "User"} />
-              <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl">
+              <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl dark:bg-[#0f0d0b] dark:text-orange-400">
                 {fullName ? fullName.charAt(0).toUpperCase() : <User className="h-12 w-12" />}
               </AvatarFallback>
             </Avatar>
@@ -323,9 +303,9 @@ export default function Profile() {
                 type="text"
                 value={userId}
                 disabled
-                className="bg-orange-50 border-orange-100 text-orange-950"
+                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 Your unique user identifier assigned by the administrator.
               </p>
             </div>
@@ -338,9 +318,9 @@ export default function Profile() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="bg-orange-50 border-orange-100 text-orange-950"
+                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 You can edit your email address here.
               </p>
             </div>
@@ -353,9 +333,9 @@ export default function Profile() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
-                className="bg-orange-50 border-orange-100 text-orange-950"
+                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 You can edit your name.
               </p>
             </div>
@@ -368,9 +348,9 @@ export default function Profile() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself"
-                className="bg-orange-50 border-orange-100 text-orange-950"
+                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 A short biography shown on your profile.
               </p>
             </div>
@@ -382,7 +362,7 @@ export default function Profile() {
                   id="timezone"
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full rounded-md border border-orange-100 bg-orange-50 px-3 py-2 text-orange-950"
+                  className="w-full rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-orange-950 dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8]"
                 >
                   <option value="UTC">UTC</option>
                   <option value="GMT">GMT</option>
@@ -396,7 +376,7 @@ export default function Profile() {
                   id="language"
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full rounded-md border border-orange-100 bg-orange-50 px-3 py-2 text-orange-950"
+                  className="w-full rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-orange-950 dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8]"
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -412,9 +392,9 @@ export default function Profile() {
                     type="checkbox"
                     checked={newsletter}
                     onChange={(e) => setNewsletter(e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 accent-orange-600 dark:accent-orange-500"
                   />
-                  <span className="text-xs">Subscribe to updates</span>
+                  <span className="text-xs text-orange-700 dark:text-[#a89880]">Subscribe to updates</span>
                 </div>
               </div>
             </div>
@@ -426,19 +406,19 @@ export default function Profile() {
                 type="password"
                 value="••••••••"
                 disabled
-                className="bg-orange-50 border-orange-100 text-orange-950"
+                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 Contact administrator to reset your password.
               </p>
             </div>
           </div>
 
-          <div className="space-y-2 border border-orange-100 rounded-lg p-4 bg-orange-50/60 dark:bg-muted/20">
+          <div className="space-y-2 border border-orange-200 rounded-lg p-4 bg-orange-50/60 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold">ID Document</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-semibold text-orange-950 dark:text-[#f5efe8]">ID Document</p>
+                <p className="text-xs text-orange-700 dark:text-[#a89880]">
                   Visible to students when uploaded
                 </p>
               </div>
@@ -449,21 +429,21 @@ export default function Profile() {
                       value={selectedUserForIdUpload}
                       onValueChange={setSelectedUserForIdUpload}
                     >
-                      <SelectTrigger className="w-full bg-orange-50 border-orange-100 text-orange-950">
+                      <SelectTrigger className="w-full bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]">
                         <SelectValue placeholder="Select student" />
                       </SelectTrigger>
-                    <SelectContent className="bg-orange-50 text-orange-950">
-                      {users.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.full_name || u.email || u.user_code || "Unknown user"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Uploading ID for {selectedUserName}
-                  </p>
-                </div>
+                      <SelectContent className="bg-orange-50 text-orange-950 dark:bg-[#1a1410] dark:text-[#f5efe8]">
+                        {users.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.full_name || u.email || u.user_code || "Unknown user"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-orange-700 dark:text-[#a89880] mt-1">
+                      Uploading ID for {selectedUserName}
+                    </p>
+                  </div>
                   <Label htmlFor="id-upload" className="cursor-pointer mb-0">
                     <Button
                       variant="outline"
@@ -511,12 +491,12 @@ export default function Profile() {
                 href={resolvedIdDocumentUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-orange-700 text-sm underline"
+                className="text-orange-700 text-sm underline dark:text-orange-400"
               >
                 View uploaded ID document
               </a>
             ) : (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 No ID document uploaded yet.
               </p>
             )}

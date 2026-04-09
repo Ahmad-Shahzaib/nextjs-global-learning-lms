@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   BookOpen, ClipboardList, Calendar, Library, Video, Award, Clock, User,
   Users, Sparkles, LayoutDashboard, CheckCircle2, Package, LifeBuoy,
@@ -11,6 +12,8 @@ import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AppDispatch, RootState } from "@/store/redux/store";
+import { fetchProfileSetting } from "@/store/redux/thunks/profileThunk";
 import { sub } from "date-fns";
 
 type SidebarItem = {
@@ -26,7 +29,7 @@ type SidebarItem = {
 const topNavigationItems: SidebarItem[] = [
   { icon: LayoutDashboard, label: "My dashboard", href: "/dashboard" },
   {
-    icon: BookOpen, label: "Your Programs", href: "/courses",
+    icon: BookOpen, label: "My Programs", href: "/courses",
     // submenu: [
     //   { label: "My Purchased", href: "/courses" },
     //   { label: "My Commenet", href: "/comment" },
@@ -37,7 +40,7 @@ const topNavigationItems: SidebarItem[] = [
 
 /* ================= STUDENT ================= */
 const studentNavigationItems: SidebarItem[] = [
-  { icon: ClipboardList, label: "Your Assignments", href: "/assignments" },
+  { icon: ClipboardList, label: "My Assignments", href: "/assignments" },
   // {
   //   icon: Award, label: "Certificates",
   //   submenu: [
@@ -183,15 +186,24 @@ function CollapseMenu({
 
 /* ─── main export ─────────────────────────────────────── */
 export function LeftSidebar() {
+  const dispatch = useDispatch<AppDispatch>();
   const { user, isAdmin, isAccounts, isTeacher } = useAuth();
+  const profile = useSelector((state: RootState) => state.profile.user);
+  const profileLoading = useSelector((state: RootState) => state.profile.loading);
 
-  const [userName, setUserName]   = useState("Student");
-  const [userRole, setUserRole]   = useState("Student");
-  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [adminUsersOpen, setAdminUsersOpen] = useState(false);
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   const isStudent = !isAdmin && !isAccounts && !isTeacher;
+  const userName = profile?.full_name || user?.full_name || user?.email || "User";
+  const avatarUrl = profile?.avatar || user?.avatar_url || "";
+  const userRole = isAdmin ? "Admin" : isTeacher ? "Teacher" : isAccounts ? "Accounts" : "Student";
+
+  useEffect(() => {
+    if (user && !profile && !profileLoading) {
+      void dispatch(fetchProfileSetting());
+    }
+  }, [user, profile, profileLoading, dispatch]);
 
   const topMenuItems = isAdmin
     ? topNavigationItems.filter((i) => i.href === "/dashboard" || i.label === "All Courses")
@@ -206,32 +218,16 @@ export function LeftSidebar() {
   const toggleMenu = (label: string) =>
     setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  useEffect(() => {
-    if (user) {
-      setUserName(user.full_name || "Student");
-      if (isAdmin)         setUserRole("Admin");
-      else if (isTeacher)  setUserRole("Teacher");
-      else if (isAccounts) setUserRole("Accounts");
-      else                 setUserRole("Student");
-
-      if (user.avatar_url) {
-        setAvatarUrl(user.avatar_url);
-        localStorage.setItem(`avatar_url_${user.id}`, user.avatar_url);
-      }
-    }
-  }, [user, isAdmin, isTeacher, isAccounts]);
-
   const rc = roleConfig[userRole] ?? roleConfig.Student;
 
   return (
-    <nav className="relative flex h-full flex-col overflow-y-auto bg-orange-50 dark:bg-sidebar px-2 py-3 text-foreground dark:text-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav className="relative flex h-full flex-col overflow-y-auto  px-2 py-3 text-foreground dark:text-foreground [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
       {/* ── User profile card ── */}
-      <div className="relative z-10 mb-4 rounded-2xl p-[1.5px] shadow-sm shadow-orange-100/50 dark:shadow-slate-900/40"
-        style={{ background: "linear-gradient(135deg, #f97316, #fbbf24)" }}>
+      <div className="relative z-10 mb-4 rounded-2xl p-[1.5px] shadow-sm shadow-orange-100/50 dark:shadow-slate-900/40 bg-gradient-to-br from-orange-500 via-amber-400 to-orange-500 dark:from-slate-800 dark:via-slate-900 dark:to-orange-950">
         <div className="relative flex items-center gap-3 rounded-[14px] bg-card px-3.5 py-3 dark:bg-slate-900">
           {/* warm tint wash */}
-          <div className="pointer-events-none absolute inset-0 rounded-[14px] bg-gradient-to-br from-orange-50/50 to-amber-50/20" />
+          <div className="pointer-events-none absolute inset-0 rounded-[14px] bg-gradient-to-br from-orange-50/50 to-amber-50/20 dark:from-orange-500/20 dark:to-orange-900/20" />
 
           {/* avatar */}
           <div className="relative z-10 shrink-0">
@@ -245,12 +241,9 @@ export function LeftSidebar() {
             <span className={cn("absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-950", rc.dot)} />
           </div>
 
-          {/* name + role */}
+          {/* name */}
           <div className="relative z-10 min-w-0 flex-1">
-            {/* <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">{userName}</p> */}
-            <span className={cn("mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold", rc.pill)}>
-              {userRole}
-            </span>
+            <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight">{userName}</p>
           </div>
 
           <Sparkles className="relative z-10 h-4 w-4 shrink-0 animate-pulse text-orange-400" />
@@ -327,7 +320,7 @@ export function LeftSidebar() {
       )}
 
       {/* bottom fade */}
-      <div className="pointer-events-none sticky bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-orange-50 dark:from-slate-950 to-transparent" />
+      <div className="pointer-events-none sticky bottom-0 left-0 right-0 h-10 " />
     </nav>
   );
 }
