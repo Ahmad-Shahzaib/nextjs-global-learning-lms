@@ -237,11 +237,36 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-            <StatCard label="Your Programs" value={userDashboard?.webinarsCount ?? 0} icon={BookOpen} accent="accent" loading={userLoading} />
-            <StatCard label="Support Messages" value={userDashboard?.supportsCount ?? 0} icon={MessageCircle} accent="primary" loading={userLoading} />
-            <StatCard label="Scheduled Meetings" value={userDashboard?.reserveMeetingsCount ?? 0} icon={CalendarCheck2} accent="warn" loading={userLoading} />
-            <StatCard label="Comments Posted" value={userDashboard?.commentsCount ?? 0} icon={MessageSquare} accent="primary" loading={userLoading} />
+          <div className="space-y-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
+              <StatCard label="Your Programs" value={userDashboard?.webinarsCount ?? 0} icon={BookOpen} accent="accent" loading={userLoading} />
+              <StatCard label="Support Messages" value={userDashboard?.supportsCount ?? 0} icon={MessageCircle} accent="primary" loading={userLoading} />
+              <StatCard label="Scheduled Meetings" value={userDashboard?.reserveMeetingsCount ?? 0} icon={CalendarCheck2} accent="warn" loading={userLoading} />
+              <StatCard label="Comments Posted" value={userDashboard?.commentsCount ?? 0} icon={MessageSquare} accent="primary" loading={userLoading} />
+            </div>
+
+            <Card className="rounded-3xl border border-orange-200/80 dark:border-[#2e2218] bg-orange-50/90 dark:bg-[#1a1410] shadow-xl">
+              <CardContent className="space-y-4 p-6">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-orange-700 dark:text-orange-400">Schedule Support</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-orange-950 dark:text-[#f5efe8]">Book a 30-minute session</h3>
+                  <p className="mt-2 text-sm text-orange-700 dark:text-[#c8b89a]">
+                    Connect with our support team to get personalized assistance, answer questions, or review your progress.
+                  </p>
+                </div>
+                <a
+                  href="https://calendly.com/globallearnerseducation-support/30min"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex mx-auto rounded-2xl bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-3 text-center text-base font-semibold text-white shadow-xl shadow-orange-500/20 transition hover:from-orange-700 hover:to-orange-600"
+                >
+                  Book 30-Minute Support
+                </a>
+                <p className="text-sm text-orange-700 dark:text-orange-500">
+                  Personal assistance for learners — opens in a new tab.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </section>
       )}

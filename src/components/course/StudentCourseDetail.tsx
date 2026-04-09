@@ -311,9 +311,9 @@ export function StudentCourseDetail() {
   );
 
   const tabs = [
-    { key: "content" as const, label: "Content", Icon: LayoutGrid },
+    { key: "content" as const, label: " Lessons", Icon: LayoutGrid },
     { key: "assessment" as const, label: "Assessment", Icon: ClipboardList },
-    { key: "certificates" as const, label: "Certificates", Icon: Award },
+    // { key: "certificates" as const, label: "Certificates", Icon: Award },
   ];
 
   const courseTitle = course?.title || course?.translations?.[0]?.title || course?.name || "Loading Course...";
@@ -330,11 +330,11 @@ export function StudentCourseDetail() {
             <div className="h-1.5 w-40 rounded-full bg-slate-200 overflow-hidden">
               <div className="h-full bg-[#5b3fd6]" style={{ width: `${courseProgress}%` }} />
             </div>
-            <span>{courseProgress}% Learnt</span>
+            <span>{courseProgress}% Studied</span>
           </div>
           <div className="hidden md:flex items-center gap-5 text-sm text-slate-600 flex-none">
-            <Link to="/courses" className="hover:text-slate-900 font-medium">Course Page</Link>
-            <Link to="/courses" className="hover:text-slate-900 font-medium">My Courses</Link>
+            <Link to="/courses" className="hover:text-slate-900 font-medium">Program Page</Link>
+            <Link to="/courses" className="hover:text-slate-900 font-medium">My Lesson</Link>
             <button className="p-1 rounded hover:bg-slate-100"><Menu className="h-5 w-5 text-slate-500" /></button>
           </div>
         </div>
