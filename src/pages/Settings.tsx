@@ -80,7 +80,7 @@ export default function Settings() {
                     "group flex w-full flex-col justify-between overflow-hidden rounded-[1.75rem] border p-6 text-left transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 dark:focus-visible:ring-orange-400",
                     isSelected
                       ? "border-orange-300 bg-orange-50 shadow-[0_20px_60px_-40px_rgba(251,146,60,0.45)] dark:border-orange-500/40 dark:bg-[#0f0d0b]"
-                      : "border-orange-200 bg-white hover:border-orange-300 hover:bg-orange-50 dark:border-[#2e2218] dark:bg-[#1a1410] dark:hover:border-orange-500/30 dark:hover:bg-[#0f0d0b]",
+                      : "border-orange-200 bg-orange-50  hover:border-orange-300 hover:bg-orange-50 dark:border-[#2e2218] dark:bg-[#1a1410] dark:hover:border-orange-500/30 dark:hover:bg-[#0f0d0b]",
                   )}
                 >
                   <div className="flex items-center gap-4">
