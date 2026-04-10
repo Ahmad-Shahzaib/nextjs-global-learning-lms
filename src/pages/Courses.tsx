@@ -126,15 +126,15 @@ function CourseCard({
       {/* ── body ── */}
       <div className="flex flex-1 flex-col gap-3 p-4 text-orange-950 dark:text-[#f5efe8]">
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-orange-700 dark:text-orange-500">
+          {/* <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-orange-700 dark:text-orange-500">
             {courseCode}
-          </p>
-          <h3 className="text-sm font-semibold text-orange-950 dark:text-[#f5efe8]">
+          </p> */}
+          <h3 className="text-lg font-semibold text-orange-500 pb-3 dark:text-[#f5efe8]">
             {course.title}
           </h3>
         </div>
 
-        <div className="grid gap-2 text-xs grid-cols-3">
+        {/* <div className="grid gap-2 text-xs grid-cols-3">
           <div className="bg-orange-50/90 p-2 rounded-lg dark:bg-[#0f0d0b]">
             <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-orange-500">Duration</p>
             <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-[#f5efe8]">{course.duration || "N/A"}</p>
@@ -159,7 +159,7 @@ function CourseCard({
             <p className="text-[8px] uppercase tracking-[0.24em] text-orange-500 dark:text-orange-500">Price</p>
             <p className="mt-0.5 text-xs font-semibold text-orange-950 dark:text-[#f5efe8]">{price}</p>
           </div>
-        </div>
+        </div> */}
 
         <div className="mt-auto">
           <Link to={`/courses/${course.id}`} className="block">

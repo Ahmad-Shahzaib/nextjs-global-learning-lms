@@ -102,7 +102,7 @@ function normalizeCourseData(data: any) {
           id: `text-${lessonData.id}`,
           icon: "text",
           title: getTranslationTitle(lessonData, "Notes & Lecture"),
-          subtitle: (lessonData?.summary || lessonData?.translations?.[0]?.summary || "") || "Text lesson",
+          subtitle: (lessonData?.summary || lessonData?.translations?.[0]?.summary || "") || "",
           textContent: getTranslationContent(lessonData),
           raw: lessonData,
         }];
@@ -188,17 +188,22 @@ export function StudentCourseDetail() {
 
   const course = deferredCourseData ?? null;
 
-  // Initialise open state and first selection only when courseId changes
+  // Reset page-specific state whenever the course changes
   useEffect(() => {
-    if (sections.length === 0) return;
+    setOpenSections({});
+    setReadToggles({});
+    setSelectedAssessmentSectionId(null);
+    setSelectedItem(null);
+  }, [courseId]);
+
+  // Initialise open state and first selection once the section data arrives
+  useEffect(() => {
+    if (sections.length === 0 || selectedItem !== null) return;
     setOpenSections(
       Object.fromEntries(sections.map((s, index) => [s.id, index === 0]))
     );
-    setReadToggles({});
-    setSelectedAssessmentSectionId(null);
     setSelectedItem({ sectionId: sections[0].id, itemIdx: 0 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseId]); // intentionally only on courseId change, not on sections
+  }, [sections, selectedItem]);
 
   const toggleSection = useCallback((sectionId: string) => {
     setOpenSections((prev) => {
@@ -326,16 +331,22 @@ export function StudentCourseDetail() {
           <h1 className="flex-1 text-sm md:text-base font-semibold text-slate-800 truncate min-w-0">
             {courseTitle}
           </h1>
-          <div className="hidden md:flex items-center gap-2 text-xs text-slate-500 flex-none">
+          {/* <div className="hidden md:flex items-center gap-2 text-xs text-slate-500 flex-none">
             <div className="h-1.5 w-40 rounded-full bg-slate-200 overflow-hidden">
               <div className="h-full bg-[#5b3fd6]" style={{ width: `${courseProgress}%` }} />
             </div>
             <span>{courseProgress}% Studied</span>
-          </div>
+          </div> */}
           <div className="hidden md:flex items-center gap-5 text-sm text-slate-600 flex-none">
-            <Link to="/courses" className="hover:text-slate-900 font-medium">Program Page</Link>
-            <Link to="/courses" className="hover:text-slate-900 font-medium">My Lesson</Link>
-            <button className="p-1 rounded hover:bg-slate-100"><Menu className="h-5 w-5 text-slate-500" /></button>
+             <Link
+              to="/e-library"
+              className="inline-flex items-center rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-orange-200 transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            >
+              E Library
+            </Link>
+            <Link to="/courses" className="hover:text-slate-900 font-medium">Menu</Link>
+           
+            {/* <button className="p-1 rounded hover:bg-slate-100"><Menu className="h-5 w-5 text-slate-500" /></button> */}
           </div>
         </div>
       </header>
@@ -695,7 +706,7 @@ export function StudentCourseDetail() {
                                       className={cn(
                                         "px-6 py-4 border-b border-slate-100 last:border-b-0 cursor-pointer transition-all group",
                                         isSelected
-                                          ? "bg-indigo-50/80 border-l-4 border-[#5b3fd6]"
+                                          ? "bg-indigo-50/80 border-l-4 border-orange-500"
                                           : "hover:bg-white"
                                       )}
                                       onClick={() => {
@@ -724,7 +735,7 @@ export function StudentCourseDetail() {
                                         </div>
                                       </div>
 
-                                      {item.hasToggle && (
+                                      {/* {item.hasToggle && (
                                         <div className="mt-3 flex items-center justify-between text-xs text-slate-600">
                                           <span className="font-medium">Mark as read</span>
                                           <Switch
@@ -734,7 +745,7 @@ export function StudentCourseDetail() {
                                             }
                                           />
                                         </div>
-                                      )}
+                                      )} */}
                                     </div>
                                   );
                                 })
