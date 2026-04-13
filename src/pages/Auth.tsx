@@ -119,14 +119,15 @@ export default function Auth() {
             </div>
 
             <h2 className="text-6xl xl:text-7xl font-bold leading-none tracking-tighter">
-              Study anywhere.<br />
+              Where knowledge
+              <br />
               <span className="bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-                Achieve everywhere.
+                meets opportunity.
               </span>
             </h2>
 
             <p className="text-xl text-muted-foreground max-w-md">
-              Join thousands of learners mastering skills with our world-class platform.
+              Access your programs, assignments, grades, and resources — all in one place. Your academic journey, simplified.
             </p>
           </div>
         </div>
