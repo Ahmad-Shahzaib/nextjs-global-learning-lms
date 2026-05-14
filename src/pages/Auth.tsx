@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
-import logoUrl from "@/assets/global-logo.png";
+import logoUrl from "../../public/uecampus-logo.png.png";
 import { useDispatch, useSelector } from "react-redux";
 import { loginThunk } from "@/store/redux/thunks/authThunk";
 import { RootState } from "@/store/redux/store";
@@ -35,6 +35,8 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
+  const [authError, setAuthError] = useState("");
   const [formKey, setFormKey] = useState(0);
   const navigatedRef = useRef(false);
   const emailRef = useRef("");
@@ -52,7 +54,7 @@ export default function Auth() {
         roles: [role],
       });
 
-      toast.success("Login successful!");
+      toast.success("Signed in successfully. Redirecting...");
       setEmail("");
       setPassword("");
       setFormKey((prev) => prev + 1);
@@ -71,7 +73,10 @@ export default function Auth() {
   useEffect(() => {
     if (error) {
       toast.error(error);
+      setAuthError(error);
       setFormKey((prev) => prev + 1);
+    } else {
+      setAuthError("");
     }
   }, [error]);
 
@@ -80,15 +85,31 @@ export default function Auth() {
     toast.dismiss();
     try {
       const validated = loginSchema.parse({ email, password });
+      setFormErrors({});
+      setAuthError("");
       await dispatch(
         loginThunk({ username: validated.email, password: validated.password }) as any
       );
     } catch (error: any) {
       setFormKey((prev) => prev + 1);
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        const fieldErrors: { email?: string; password?: string } = {};
+        for (const err of error.errors) {
+          if (err.path.includes("email")) fieldErrors.email = err.message;
+          if (err.path.includes("password")) fieldErrors.password = err.message;
+        }
+        setFormErrors(fieldErrors);
+        const toastMessage =
+          fieldErrors.email ||
+          fieldErrors.password ||
+          "Please review the highlighted fields and try again.";
+        toast.error(toastMessage);
       } else {
-        toast.error(error?.message || "Failed to sign in. Please try again.");
+        const message =
+          error?.message ||
+          "Unable to sign in at this time. Please try again later.";
+        setAuthError(message);
+        toast.error(message);
       }
     }
   };
@@ -155,6 +176,12 @@ export default function Auth() {
               onSubmit={handleLogin}
               className="space-y-6"
             >
+              {authError ? (
+                <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {authError}
+                </div>
+              ) : null}
+
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
@@ -163,11 +190,18 @@ export default function Auth() {
                 <Input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setFormErrors((prev) => ({ ...prev, email: undefined }));
+                    setAuthError("");
+                  }}
                   required
                   disabled={loading}
-                  className="h-12 bg-background/50 border-border/60 focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all"
+                  className={`h-12 bg-background/50 border ${formErrors.email ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
                 />
+                {formErrors.email ? (
+                  <p className="text-sm text-destructive">{formErrors.email}</p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -193,11 +227,18 @@ export default function Auth() {
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setFormErrors((prev) => ({ ...prev, password: undefined }));
+                    setAuthError("");
+                  }}
                   required
                   disabled={loading}
-                  className="h-12 bg-background/50 border-border/60 focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all"
+                  className={`h-12 bg-background/50 border ${formErrors.password ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
                 />
+                {formErrors.password ? (
+                  <p className="text-sm text-destructive">{formErrors.password}</p>
+                ) : null}
               </div>
 
               <div className="flex justify-end">
@@ -206,7 +247,9 @@ export default function Auth() {
                   variant="link"
                   className="text-xs text-muted-foreground px-0 hover:text-primary"
                   onClick={() =>
-                    toast.info("Use your administrator to reset your password.")
+                    toast.info(
+                      "If you forgot your password, please contact your administrator for assistance."
+                    )
                   }
                 >
                   Forgot password?

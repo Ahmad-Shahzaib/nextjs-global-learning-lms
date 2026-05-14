@@ -162,7 +162,7 @@ export default function Dashboard() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="mt-1 text-5xl font-semibold text-orange-950 dark:text-[#f5efe8]">
-              {isAdmin ? "Dashboard" : "Welcome to GLE Dashboard"}
+              {isAdmin ? "Dashboard" : "Welcome to GME  Dashboard"}
             </h1>
             {isAdmin ? (
               <p className="mt-3 max-w-2xl text-slate-600 dark:text-[#a89880]">
@@ -255,7 +255,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <a
-                  href="https://calendly.com/globallearnerseducation-support/30min"
+                  href="https://calendly.com/globalminds-education-support/30min"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex mx-auto rounded-2xl bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-3 text-center text-base font-semibold text-white shadow-xl shadow-orange-500/20 transition hover:from-orange-700 hover:to-orange-600"

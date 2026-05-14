@@ -6,32 +6,32 @@ const departments = [
     title: "Academic Support",
     description:
       "For questions related to courses, assignments, exams, lectures, study materials, and academic guidance.",
-    email: "support@globallearnerseducation.com",
-    phone: "+971 50 279 0862",
+    email: "support@globalminds-education.com",
+    phone: "+971 50 348 5937",
     hours: "Monday – Sunday, 9:00 AM – 11:00 PM (GST)",
   },
   {
     title: "Finance & Fee Department",
     description:
       "For payment-related queries, installments, invoices, refunds, and fee structure.",
-    email: "accounts@globallearnerseducation.com",
-    phone: "+971 50 134 8776",
+    email: " accounts@globalminds-education.com",
+    phone: " +971 58 120 7240",
     hours: "Monday – Saturday, 9:00 AM – 11:00 PM (GST)",
   },
   {
     title: "Admissions Department",
     description:
       "For new enrolments, program information, eligibility, application status, and document submissions.",
-    email: "admissions@globallearnerseducation.com",
-    phone: "+971 50 285 9767",
+    email: " admissions@globalminds-education.com",
+    phone: "+971 50 348 5937",
     hours: "Monday – Sunday, 9:00 AM – 11:00 PM (GST)",
   },
   {
     title: "Alumni & Student Affairs Department",
     description:
       "For all matters related to student welfare, alumni relations, networking opportunities, events, student grievances, and post-graduation support.",
-    email: "admissions@globallearnerseducation.com",
-    phone: "+971 50 285 9767",
+    email: " alumni@globalminds-education.com",
+    phone: "+971 50 348 5937",
     hours: "Monday – Sunday, 9:00 AM – 11:00 PM (GST)",
   },
 ];
@@ -43,7 +43,7 @@ export default function Support() {
         {/* Hero Section */}
         <div className="text-center border border-orange-200 bg-orange-50 shadow-md rounded-3xl p-8 dark:border-[#2e2218] dark:bg-[#1a1410]">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-orange-950 dark:text-[#f5efe8]">
-            Welcome to the GLE Help Desk
+            Welcome to the GME   Help Desk
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-orange-600 dark:text-[#a89880]">
             We&apos;re here to support you every step of your learning journey. 

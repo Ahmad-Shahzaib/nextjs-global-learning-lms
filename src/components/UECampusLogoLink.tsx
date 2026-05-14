@@ -1,5 +1,5 @@
 
-import ueLogo from "../../public/uecampus-logo.png";
+import ueLogo from "../../public/uecampus-logo.png.png";
 import whiteLogo from "../../public/white.png";
 
 interface GlobalLearningLogoLinkProps {
