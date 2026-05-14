@@ -21,7 +21,7 @@ import type { RootState } from '../store/redux/store';
 export const API_BASE_URL =
   typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL
     ? import.meta.env.VITE_API_BASE_URL.replace(/\/?$/, '')
-    : 'https://api.globallearnerseducation.com/api';
+    : 'https://api.globalminds-education.com/api';
 
 // ---------------------------------------------------------------------------
 // Lazy store injection

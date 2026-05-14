@@ -4,7 +4,7 @@ import axios from 'axios';
 // Use API base URL from environment variable
 const API_BASE_URL = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL)
   ? import.meta.env.VITE_API_BASE_URL.replace(/\/?$/, "")
-  : "https://api.globallearnerseducation.com/api";
+  : "https://api.globalminds-education.com/api";
 
 export const loginThunk = createAsyncThunk(
   'auth/login',
