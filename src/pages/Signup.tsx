@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,106 +8,81 @@ import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import logoUrl from "../../public/uecampus-logo.png.png";
-import { useDispatch, useSelector } from "react-redux";
-import { loginThunk } from "@/store/redux/thunks/authThunk";
-import { RootState } from "@/store/redux/store";
-import { useAuth } from "@/hooks/useAuth";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address").trim().toLowerCase(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const signUpSchema = z
+  .object({
+    fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    email: z.string().email("Invalid email address").trim().toLowerCase(),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match",
+  });
 
-const rawBase =
-  (import.meta.env.VITE_BASENAME as string | undefined) ||
-  (import.meta.env.BASE_URL as string | undefined) ||
-  "/";
-const BASENAME = rawBase === "/" ? "" : `/${rawBase.replace(/^\/+|\/+$/g, "")}`;
-
-export default function Auth() {
+export default function Signup() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { login: authLogin } = useAuth();
-  const { token, user_id, role, loading, error } = useSelector(
-    (state: RootState) => state.auth
-  );
-
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
-  const [authError, setAuthError] = useState("");
+  const [formErrors, setFormErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [formKey, setFormKey] = useState(0);
-  const navigatedRef = useRef(false);
-  const emailRef = useRef("");
+  const [authError, setAuthError] = useState("");
+  const fullNameRef = useRef("");
 
   useEffect(() => {
-    emailRef.current = email;
-  }, [email]);
+    fullNameRef.current = fullName;
+  }, [fullName]);
 
-  useEffect(() => {
-    if (token && user_id && role && !navigatedRef.current) {
-      navigatedRef.current = true;
-
-      authLogin(token, {
-        user: { id: String(user_id), email: emailRef.current },
-        roles: [role],
-      });
-
-      toast.success("Signed in successfully. Redirecting...");
-      setEmail("");
-      setPassword("");
-      setFormKey((prev) => prev + 1);
-
-      let target = "/dashboard";
-      if (role === "teacher") target = "/teacher/dashboard";
-      else if (role === "student") target = "/student/dashboard";
-      else if (role === "admin") target = "/admin/dashboard";
-
-      if (BASENAME) target = `${BASENAME}${target}`;
-
-      navigate(target, { replace: true });
-    }
-  }, [token, user_id, role, authLogin, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      setAuthError(error);
-      setFormKey((prev) => prev + 1);
-    } else {
-      setAuthError("");
-    }
-  }, [error]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     toast.dismiss();
+
     try {
-      const validated = loginSchema.parse({ email, password });
+      const validated = signUpSchema.parse({
+        fullName,
+        email,
+        password,
+        confirmPassword,
+      });
       setFormErrors({});
       setAuthError("");
-      await dispatch(
-        loginThunk({ username: validated.email, password: validated.password }) as any
-      );
+      toast.success("Signup submitted. Please sign in with your new account.");
+      navigate("/auth", { replace: true });
     } catch (error: any) {
       setFormKey((prev) => prev + 1);
       if (error instanceof z.ZodError) {
-        const fieldErrors: { email?: string; password?: string } = {};
+        const fieldErrors: {
+          fullName?: string;
+          email?: string;
+          password?: string;
+          confirmPassword?: string;
+        } = {};
         for (const err of error.errors) {
+          if (err.path.includes("fullName")) fieldErrors.fullName = err.message;
           if (err.path.includes("email")) fieldErrors.email = err.message;
           if (err.path.includes("password")) fieldErrors.password = err.message;
+          if (err.path.includes("confirmPassword")) fieldErrors.confirmPassword = err.message;
         }
         setFormErrors(fieldErrors);
         const toastMessage =
+          fieldErrors.fullName ||
           fieldErrors.email ||
           fieldErrors.password ||
+          fieldErrors.confirmPassword ||
           "Please review the highlighted fields and try again.";
         toast.error(toastMessage);
       } else {
         const message =
-          error?.message ||
-          "Unable to sign in at this time. Please try again later.";
+          error?.message || "Unable to create account at this time. Please try again later.";
         setAuthError(message);
         toast.error(message);
       }
@@ -116,21 +91,13 @@ export default function Auth() {
 
   return (
     <div className="relative min-h-screen flex overflow-hidden bg-background">
-      {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-hero opacity-75 pointer-events-none" />
-
-      {/* Subtle Grid Overlay for Depth */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:40px_40px] opacity-10 pointer-events-none" />
 
-      {/* Left Side - Hero Section */}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden">
         <div className="flex flex-col justify-center px-16 xl:px-24 w-full">
           <div className="flex justify-start mb-16">
-            <img
-              src={logoUrl}
-              alt="Global Learning LMS"
-              className="h-20 w-auto drop-shadow-xl"
-            />
+            <img src={logoUrl} alt="Global Learning LMS" className="h-20 w-auto drop-shadow-xl" />
           </div>
 
           <div className="space-y-8 text-foreground">
@@ -140,47 +107,53 @@ export default function Auth() {
             </div>
 
             <h2 className="text-6xl xl:text-7xl font-bold leading-none tracking-tighter">
-              Where knowledge
+              Start your journey
               <br />
               <span className="bg-gradient-to-r from-primary via-primary/90 to-primary/70 bg-clip-text text-transparent">
-                meets opportunity.
+                with a new account.
               </span>
             </h2>
 
             <p className="text-xl text-muted-foreground max-w-md">
-              Access your programs, assignments, grades, and resources — all in one place. Your academic journey, simplified.
+              Register for access to courses, assignments, and resources. After signup, sign in to continue.
             </p>
           </div>
         </div>
 
-        {/* Decorative floating elements */}
         <div className="absolute bottom-20 right-20 w-64 h-64 border border-primary/10 rounded-full animate-[spin_60s_linear_infinite]" />
         <div className="absolute top-40 right-40 w-32 h-32 border border-primary/10 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-12  md:py-8 lg:py-16 relative z-10">
-        <Card
-          className="w-full max-w-lg bg-card/80 backdrop-blur-xl border border-border/60 shadow-2xl 
-                     transition-all duration-500 hover:shadow-3xl hover:-translate-y-1 
-                     animate-fade-in"
-        >
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 lg:px-12 md:py-8 lg:py-16 relative z-10">
+        <Card className="w-full max-w-lg bg-card/80 backdrop-blur-xl border border-border/60 shadow-2xl transition-all duration-500 hover:shadow-3xl hover:-translate-y-1 animate-fade-in">
           <CardContent className="pt-10 pb-12 px-10 space-y-8">
             <div className="space-y-2 text-center">
-              <p className="text-3xl font-semibold tracking-tight">Welcome back</p>
-              <p className="text-muted-foreground">Sign in to continue your learning journey</p>
+              <p className="text-3xl font-semibold tracking-tight">Create your account</p>
+              <p className="text-muted-foreground">Sign up now to join the Global Learning LMS.</p>
             </div>
 
-            <form
-              key={formKey}
-              onSubmit={handleLogin}
-              className="space-y-6"
-            >
+            <form key={formKey} onSubmit={handleSignUp} className="space-y-6">
               {authError ? (
                 <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
                   {authError}
                 </div>
               ) : null}
+
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Full name</Label>
+                <Input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    setFormErrors((prev) => ({ ...prev, fullName: undefined }));
+                    setAuthError("");
+                  }}
+                  required
+                  className={`h-12 bg-background/50 border ${formErrors.fullName ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
+                />
+                {formErrors.fullName ? <p className="text-sm text-destructive">{formErrors.fullName}</p> : null}
+              </div>
 
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-muted-foreground">
@@ -196,12 +169,9 @@ export default function Auth() {
                     setAuthError("");
                   }}
                   required
-                  disabled={loading}
                   className={`h-12 bg-background/50 border ${formErrors.email ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
                 />
-                {formErrors.email ? (
-                  <p className="text-sm text-destructive">{formErrors.email}</p>
-                ) : null}
+                {formErrors.email ? <p className="text-sm text-destructive">{formErrors.email}</p> : null}
               </div>
 
               <div className="space-y-2">
@@ -217,11 +187,7 @@ export default function Auth() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="h-8 px-2 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
                 <Input
@@ -233,44 +199,42 @@ export default function Auth() {
                     setAuthError("");
                   }}
                   required
-                  disabled={loading}
                   className={`h-12 bg-background/50 border ${formErrors.password ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
                 />
-                {formErrors.password ? (
-                  <p className="text-sm text-destructive">{formErrors.password}</p>
-                ) : null}
+                {formErrors.password ? <p className="text-sm text-destructive">{formErrors.password}</p> : null}
               </div>
 
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-xs text-muted-foreground px-0 hover:text-primary"
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  Forgot password?
-                </Button>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Confirm password</Label>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setFormErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                    setAuthError("");
+                  }}
+                  required
+                  className={`h-12 bg-background/50 border ${formErrors.confirmPassword ? "border-destructive" : "border-border/60"} focus:border-primary/70 focus:ring-2 focus:ring-primary/30 transition-all`}
+                />
+                {formErrors.confirmPassword ? <p className="text-sm text-destructive">{formErrors.confirmPassword}</p> : null}
               </div>
 
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
-                disabled={loading}
-              >
-                {loading ? "Signing in..." : "Sign in"}
+              <Button type="submit" className="w-full h-12 text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                Create account
               </Button>
 
               <Button
                 type="button"
                 variant="secondary"
                 className="w-full h-12 text-base"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/auth")}
               >
-                Create new account
+                Back to sign in
               </Button>
 
               <p className="text-xs text-center text-muted-foreground pt-2">
-                Need access? Contact your administrator.
+                Already have an account? Sign in using your email and password.
               </p>
             </form>
           </CardContent>

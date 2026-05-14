@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Menu, X, Search, Settings, User, ChevronLeft, ChevronRight, Edit2, Save, LogOut, Moon, Sun } from "lucide-react";
+import { Menu, Search, User, ChevronLeft, LogOut, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { NotificationBell } from "./NotificationBell";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
 import { LeftSidebar } from "./LeftSidebar";
 // import { RightSidebar } from "./RightSidebar";
 import { useEditMode } from "@/contexts/EditModeContext";
@@ -155,53 +154,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
             <NotificationBell />
             
-            {/* Settings Dropdown with Edit Mode */}
+            {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon"
                   className=" hover:bg-orange-100 hover:text-orange-700 transition-all duration-300 dark:hover:bg-primary/20 dark:hover:text-primary relative"
-                  aria-label="Settings"
+                  aria-label="Open profile menu"
                 >
-                  <Settings className="h-5 w-5" />
-                  {isEditMode && (
-                    <span className="absolute top-1 right-1 h-2 w-2 bg-success rounded-full" />
-                  )}
+                  <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72 max-w-[90vw] bg-orange-50 border-orange-100 dark:bg-card dark:border-border">
-                <DropdownMenuLabel className="flex flex-col gap-1">
-                  <span>Settings</span>
-                  <div className="flex items-center gap-2">
-                    {isEditMode && <Badge variant="outline" className="text-xs">EDITING</Badge>}
-                    {isAdmin && <Badge className="text-xs bg-primary text-primary-foreground">ADMIN</Badge>}
-                  </div>
-                </DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56 max-w-[90vw] bg-orange-50 border-orange-100 dark:bg-card dark:border-border">
+                <DropdownMenuLabel className="text-sm font-medium">Profile</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {isAdmin && (
-                  <>
-                    <DropdownMenuItem onClick={handleEditModeToggle} className="cursor-pointer">
-                      {isEditMode ? (
-                        <>
-                          <Save className="mr-2 h-4 w-4 text-success" />
-                          <span>Save & Exit Edit Mode</span>
-                        </>
-                      ) : (
-                        <>
-                          <Edit2 className="mr-2 h-4 w-4 text-primary" />
-                          <span>Enable Edit Mode</span>
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem className="cursor-pointer break-words" onClick={() => navigate("/profile")}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}> 
                   <User className="mr-2 h-4 w-4" />
-                  <span className="whitespace-normal break-words">{profileLabel}</span>
+                  <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sign Out</span>

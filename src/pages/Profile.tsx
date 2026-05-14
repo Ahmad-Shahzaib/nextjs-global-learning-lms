@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -296,19 +297,7 @@ export default function Profile() {
 
           {/* Profile Information */}
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userId">User ID</Label>
-              <Input
-                id="userId"
-                type="text"
-                value={userId}
-                disabled
-                className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
-              />
-              <p className="text-xs text-orange-700 dark:text-[#a89880]">
-                Your unique user identifier assigned by the administrator.
-              </p>
-            </div>
+          
 
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
@@ -316,13 +305,12 @@ export default function Profile() {
                 id="email"
                 type="email"
                 value={email}
+                readOnly
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 className="bg-orange-50 border-orange-200 text-orange-950 dark:bg-[#0f0d0b] dark:border-[#2e2218] dark:text-[#f5efe8]"
               />
-              <p className="text-xs text-orange-700 dark:text-[#a89880]">
-                You can edit your email address here.
-              </p>
+            
             </div>
 
             <div className="space-y-2">
@@ -342,9 +330,8 @@ export default function Profile() {
 
             <div className="space-y-2">
               <Label htmlFor="bio">Bio</Label>
-              <Input
+              <Textarea
                 id="bio"
-                type="text"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself"
@@ -353,50 +340,6 @@ export default function Profile() {
               <p className="text-xs text-orange-700 dark:text-[#a89880]">
                 A short biography shown on your profile.
               </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <select
-                  id="timezone"
-                  value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-orange-950 dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8]"
-                >
-                  <option value="UTC">UTC</option>
-                  <option value="GMT">GMT</option>
-                  <option value="EST">EST</option>
-                  <option value="PST">PST</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="language">Language</Label>
-                <select
-                  id="language"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full rounded-md border border-orange-200 bg-orange-50 px-3 py-2 text-orange-950 dark:border-[#2e2218] dark:bg-[#0f0d0b] dark:text-[#f5efe8]"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newsletter">Newsletter</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id="newsletter"
-                    type="checkbox"
-                    checked={newsletter}
-                    onChange={(e) => setNewsletter(e.target.checked)}
-                    className="h-4 w-4 accent-orange-600 dark:accent-orange-500"
-                  />
-                  <span className="text-xs text-orange-700 dark:text-[#a89880]">Subscribe to updates</span>
-                </div>
-              </div>
             </div>
 
             <div className="space-y-2">

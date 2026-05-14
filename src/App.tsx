@@ -16,6 +16,8 @@ import AllStaff from "./pages/AllStaff";
 
 // Lazy load components for better performance
 const Auth = lazy(() => import("./pages/Auth"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const Blocked = lazy(() => import("./pages/Blocked"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Courses = lazy(() => import("./pages/Courses"));
@@ -171,6 +173,18 @@ const App = () => (
                   <Route path="/auth" element={
                     <PublicRoute>
                       <Auth />
+                    </PublicRoute>
+                  } />
+
+                  <Route path="/signup" element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  } />
+
+                  <Route path="/forgot-password" element={
+                    <PublicRoute>
+                      <ForgotPassword />
                     </PublicRoute>
                   } />
                   
