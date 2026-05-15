@@ -75,6 +75,29 @@ function buildPresentationPreviewUrl(fileUrl: string) {
   return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
 }
 
+function getYouTubeVideoId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "youtu.be") {
+      return parsed.pathname.slice(1).split(/[?#]/)[0] || null;
+    }
+    if (parsed.hostname.replace(/^www\./, "") === "youtube.com") {
+      if (parsed.pathname === "/watch") return parsed.searchParams.get("v");
+      const embedMatch = parsed.pathname.match(/^\/embed\/([^/?#]+)/);
+      if (embedMatch) return embedMatch[1];
+      const shortMatch = parsed.pathname.match(/^\/shorts\/([^/?#]+)/);
+      if (shortMatch) return shortMatch[1];
+    }
+  } catch {
+    // not a valid URL
+  }
+  return null;
+}
+
+function buildYouTubeEmbedUrl(videoId: string) {
+  return `https://www.youtube.com/embed/${videoId}?rel=0`;
+}
+
 function normalizeCourseData(data: any) {
   // Runs once per query result — heavy work isolated here
   const chaptersRaw: any[] = data.chapters || data.sections || data.course_sections || [];
@@ -566,6 +589,50 @@ export function StudentCourseDetail() {
                   }
                   const fileIsPdf = getFileExtension(currentItem.fileUrl) === "pdf";
                   const filePdfPreviewUrl = buildPdfPreviewUrl(currentItem.fileUrl);
+                  const youtubeVideoId = getYouTubeVideoId(currentItem.fileUrl);
+                  const youtubeEmbedUrl = youtubeVideoId ? buildYouTubeEmbedUrl(youtubeVideoId) : null;
+
+                  if (youtubeEmbedUrl) {
+                    return (
+                      <div className="flex flex-col h-full bg-slate-900">
+                        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800 flex-none">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-red-600 flex items-center justify-center flex-none">
+                              <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.75 15.5v-7l6.25 3.5-6.25 3.5z" />
+                              </svg>
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="text-white font-semibold truncate leading-tight">{currentItem.title}</h3>
+                              {currentItem.subtitle && (
+                                <p className="text-slate-400 text-xs truncate mt-0.5">{currentItem.subtitle}</p>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white transition-colors"
+                            asChild
+                          >
+                            <a href={currentItem.fileUrl} target="_blank" rel="noopener noreferrer">
+                              Open in YouTube
+                            </a>
+                          </Button>
+                        </div>
+                        <div className="flex-1 bg-black relative">
+                          <iframe
+                            src={youtubeEmbedUrl}
+                            className="w-full h-full border-0"
+                            title={currentItem.title || "YouTube Video"}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="h-full flex flex-col">
                       <div className="px-4 py-4 border-b bg-slate-50">
