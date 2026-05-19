@@ -75,6 +75,14 @@ function buildPresentationPreviewUrl(fileUrl: string) {
   return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
 }
 
+function isOfficePreviewExtension(ext?: string) {
+  return ["doc", "docx", "ppt", "pptx", "xls", "xlsx"].includes(ext?.toLowerCase?.() || "");
+}
+
+function buildOfficePreviewUrl(fileUrl: string) {
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+}
+
 function getYouTubeVideoId(url: string): string | null {
   try {
     const parsed = new URL(url);
@@ -96,6 +104,62 @@ function getYouTubeVideoId(url: string): string | null {
 
 function buildYouTubeEmbedUrl(videoId: string) {
   return `https://www.youtube.com/embed/${videoId}?rel=0`;
+}
+
+function getGoogleDocType(url: string): "doc" | "sheet" | "slide" | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes("docs.google.com")) return null;
+    if (parsed.pathname.startsWith("/document/")) return "doc";
+    if (parsed.pathname.startsWith("/spreadsheets/")) return "sheet";
+    if (parsed.pathname.startsWith("/presentation/")) return "slide";
+  } catch {
+    // invalid URL
+  }
+  return null;
+}
+
+function buildGoogleDocEmbedUrl(url: string, type: "doc" | "sheet" | "slide"): string {
+  try {
+    const parsed = new URL(url);
+    const pathParts = parsed.pathname.split("/");
+    const docId = pathParts[3]; // Usually at position 3 after /document/d/ or /spreadsheets/d/
+    
+    if (type === "doc") {
+      return `https://docs.google.com/document/d/${docId}/preview`;
+    }
+    if (type === "sheet") {
+      return `https://docs.google.com/spreadsheets/d/${docId}/preview`;
+    }
+    if (type === "slide") {
+      return `https://docs.google.com/presentation/d/${docId}/embed`;
+    }
+  } catch {
+    // fallback to original URL
+  }
+  return url;
+}
+
+function getGoogleDriveFileId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes("drive.google.com")) return null;
+    
+    // Pattern: /file/d/FILE_ID/view or /file/d/FILE_ID/edit
+    const fileMatch = parsed.pathname.match(/\/file\/d\/([^/]+)/);
+    if (fileMatch) return fileMatch[1];
+    
+    // Pattern: /open?id=FILE_ID
+    const idParam = parsed.searchParams.get("id");
+    if (idParam) return idParam;
+  } catch {
+    // invalid URL
+  }
+  return null;
+}
+
+function buildGoogleDriveEmbedUrl(fileId: string): string {
+  return `https://drive.google.com/file/d/${fileId}/preview`;
 }
 
 function normalizeCourseData(data: any) {
@@ -588,9 +652,15 @@ export function StudentCourseDetail() {
                     );
                   }
                   const fileIsPdf = getFileExtension(currentItem.fileUrl) === "pdf";
+                  const fileIsOffice = isOfficePreviewExtension(getFileExtension(currentItem.fileUrl));
                   const filePdfPreviewUrl = buildPdfPreviewUrl(currentItem.fileUrl);
+                  const fileOfficePreviewUrl = fileIsOffice ? buildOfficePreviewUrl(currentItem.fileUrl) : null;
                   const youtubeVideoId = getYouTubeVideoId(currentItem.fileUrl);
                   const youtubeEmbedUrl = youtubeVideoId ? buildYouTubeEmbedUrl(youtubeVideoId) : null;
+                  const googleDocType = getGoogleDocType(currentItem.fileUrl);
+                  const googleDocEmbedUrl = googleDocType ? buildGoogleDocEmbedUrl(currentItem.fileUrl, googleDocType) : null;
+                  const googleDriveFileId = getGoogleDriveFileId(currentItem.fileUrl);
+                  const googleDriveEmbedUrl = googleDriveFileId ? buildGoogleDriveEmbedUrl(googleDriveFileId) : null;
 
                   if (youtubeEmbedUrl) {
                     return (
@@ -626,6 +696,178 @@ export function StudentCourseDetail() {
                             className="w-full h-full border-0"
                             title={currentItem.title || "YouTube Video"}
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (googleDocEmbedUrl) {
+                    const docTypeLabel = 
+                      googleDocType === "doc" ? "Google Document" :
+                      googleDocType === "sheet" ? "Google Sheet" :
+                      googleDocType === "slide" ? "Google Slides" : "Google Document";
+                    
+                    return (
+                      <div className="flex flex-col h-full bg-slate-900">
+                        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800 flex-none">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-blue-500 flex items-center justify-center flex-none">
+                              <FileText className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="text-white font-semibold truncate leading-tight">{currentItem.title}</h3>
+                              {currentItem.subtitle && (
+                                <p className="text-slate-400 text-xs truncate mt-0.5">{currentItem.subtitle}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white transition-colors"
+                              asChild
+                            >
+                              <a href={currentItem.fileUrl} target="_blank" rel="noopener noreferrer">
+                                Open in Google Docs
+                              </a>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex"
+                              onClick={() => {
+                                const iframe = document.getElementById('google-doc-iframe') as HTMLIFrameElement;
+                                if (iframe?.requestFullscreen) iframe.requestFullscreen();
+                              }}
+                            >
+                              <Maximize2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex-1 bg-slate-800 relative">
+                          <iframe
+                            id="google-doc-iframe"
+                            src={googleDocEmbedUrl}
+                            className="w-full h-full border-0"
+                            title={currentItem.title || docTypeLabel}
+                            allow="autoplay; fullscreen"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (googleDriveEmbedUrl) {
+                    return (
+                      <div className="flex flex-col h-full bg-slate-900">
+                        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800 flex-none">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-green-600 flex items-center justify-center flex-none">
+                              <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.01 1.485c-2.082 0-3.754.02-3.743.047.007.021 1.832 3.171 4.056 7l4.039 6.961 2.047-3.519 2.047-3.519-2.994-5.172C15.75 1.185 14.18.555 12.01 1.485zm-6.736 6.565L1.218 15.38l1.98.908c1.089.5 2.048.92 2.132.934.085.013 1.587-2.42 3.342-5.407L11.99 5.488l-2.031-3.502C8.919.388 7.926.002 7.908.01c-.02.008-1.187 3.564-2.635 7.905v.135zm13.403 4.38l-2.05 3.536 2.05 3.536 2.05 3.535 2.04-3.535 2.04-3.535-2.04-3.536-2.04-3.536-2.05 3.536zM8.106 19.77c-2.234 3.856-4.066 7.044-4.072 7.087-.006.043 1.682.057 3.75.035l3.76-.043 2.05-3.543 2.05-3.543-1.74-3.017c-.96-1.66-1.76-3.017-1.78-3.017-.02 0-1.877 3.184-4.128 7.076l.11-.035z"/>
+                              </svg>
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="text-white font-semibold truncate leading-tight">{currentItem.title}</h3>
+                              {currentItem.subtitle && (
+                                <p className="text-slate-400 text-xs truncate mt-0.5">{currentItem.subtitle}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white transition-colors"
+                              asChild
+                            >
+                              <a href={currentItem.fileUrl} target="_blank" rel="noopener noreferrer">
+                                Open in Google Drive
+                              </a>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex"
+                              onClick={() => {
+                                const iframe = document.getElementById('google-drive-iframe') as HTMLIFrameElement;
+                                if (iframe?.requestFullscreen) iframe.requestFullscreen();
+                              }}
+                            >
+                              <Maximize2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex-1 bg-slate-800 relative">
+                          <iframe
+                            id="google-drive-iframe"
+                            src={googleDriveEmbedUrl}
+                            className="w-full h-full border-0"
+                            title={currentItem.title || "Google Drive File"}
+                            allow="autoplay; fullscreen"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  if (fileOfficePreviewUrl) {
+                    return (
+                      <div className="flex flex-col h-full bg-slate-900">
+                        <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800 flex-none">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center flex-none">
+                              <Presentation className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="min-w-0">
+                              <h3 className="text-white font-semibold truncate leading-tight">
+                                {currentItem.title}
+                              </h3>
+                              {currentItem.subtitle && (
+                                <p className="text-slate-400 text-xs truncate mt-0.5">
+                                  {currentItem.subtitle}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white transition-colors"
+                              asChild
+                            >
+                              <a href={currentItem.fileUrl} target="_blank" rel="noopener noreferrer" download>
+                                <Download className="h-4 w-4 mr-2" />
+                                <span className="hidden sm:inline">Download</span>
+                                <span className="sm:hidden">Download</span>
+                              </a>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex"
+                              onClick={() => {
+                                const iframe = document.getElementById('office-file-iframe') as HTMLIFrameElement;
+                                if (iframe?.requestFullscreen) iframe.requestFullscreen();
+                              }}
+                            >
+                              <Maximize2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex-1 bg-slate-800 relative">
+                          <iframe
+                            id="office-file-iframe"
+                            src={fileOfficePreviewUrl}
+                            className="w-full h-full border-0"
+                            title={currentItem.title || "Document Preview"}
+                            allow="autoplay; fullscreen"
                             allowFullScreen
                           />
                         </div>
