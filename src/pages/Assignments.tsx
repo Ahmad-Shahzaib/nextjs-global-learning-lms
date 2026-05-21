@@ -147,10 +147,6 @@ const Assignments = () => {
       <p className="text-sm text-muted-foreground">No assignment selected.</p>
     );
 
-    const deadlineText = selectedAssignment.deadline
-      ? new Date(selectedAssignment.deadline * 1000).toLocaleString()
-      : "-";
-
     const formatBadge = (value?: boolean | string | number | null) => {
       if (value === undefined || value === null || value === "") {
         return "-";
@@ -186,10 +182,6 @@ const Assignments = () => {
                     {selectedAssignment.user_status || "-"}
                   </span>
                 </dd>
-              </div>
-              <div className="flex justify-between gap-2">
-                <dt className="font-medium text-slate-500 dark:text-[#a89880]">Deadline</dt>
-                <dd className="text-right text-slate-900 dark:text-[#f5efe8]">{deadlineText}</dd>
               </div>
             </dl>
           </div>
@@ -240,11 +232,6 @@ const Assignments = () => {
     { header: "Webinar", accessor: (row) => row.webinar_title || "-" },
     { header: "Student", accessor: (row) => row.student?.full_name || "-" },
     { header: "Status", accessor: (row) => row.user_status || "-" },
-    {
-      header: "Deadline",
-      accessor: (row) =>
-        row.deadline ? new Date(row.deadline * 1000).toLocaleString() : "-",
-    },
     {
       header: "Attempts",
       accessor: (row) => `${row.used_attempts_count ?? 0}/${row.attempts ?? 0}`,
