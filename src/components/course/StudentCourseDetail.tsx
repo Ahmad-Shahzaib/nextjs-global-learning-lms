@@ -375,6 +375,11 @@ export function StudentCourseDetail() {
     []
   );
 
+  const assessmentSections = useMemo(
+    () => sections.filter((section) => getAssessmentItems(section).length > 0),
+    [sections, getAssessmentItems]
+  );
+
   const assessmentSelectedSection = useMemo(
     () => sections.find((s) => s.id === selectedAssessmentSectionId) || null,
     [sections, selectedAssessmentSectionId]
@@ -1253,8 +1258,12 @@ export function StudentCourseDetail() {
                         <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-8 text-center">
                           <p className="text-slate-400">No chapters available yet.</p>
                         </div>
+                      ) : assessmentSections.length === 0 ? (
+                        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-8 text-center">
+                          <p className="text-slate-400">No chapters with assignments yet.</p>
+                        </div>
                       ) : (
-                        sections.map((section, sectionIndex) => {
+                        assessmentSections.map((section, sectionIndex) => {
                           const chapterTitle = section.title || `Chapter ${sectionIndex + 1}`;
                           const assessmentItems = getAssessmentItems(section);
                           const firstAssessmentIndex = (section.items || []).findIndex(
