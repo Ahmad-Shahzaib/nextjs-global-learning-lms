@@ -27,6 +27,10 @@ function getTranslationContent(item: any) {
   return item?.content || item?.translations?.[0]?.content || "";
 }
 
+function getTranslationDescription(item: any, fallback = "") {
+  return item?.description || item?.translations?.[0]?.description || fallback;
+}
+
 function getFileNameFromPath(path?: string) {
   if (!path) return "Untitled file";
   return (path.split("/").pop() || path).split("?")[0].split("#")[0];
@@ -165,6 +169,7 @@ function buildGoogleDriveEmbedUrl(fileId: string): string {
 function normalizeCourseData(data: any) {
   // Runs once per query result — heavy work isolated here
   const chaptersRaw: any[] = data.chapters || data.sections || data.course_sections || [];
+  const assignmentsRaw: any[] = data.assignments || data.webinar_assignments || [];
 
   const fileMap = new Map<number, any>();
   (data.files || []).forEach((f: any) => fileMap.set(Number(f.id), f));
@@ -179,7 +184,7 @@ function normalizeCourseData(data: any) {
     const chapterItems: any[] = chapter.chapter_items || chapter.chapterItems || [];
     const sortedItems = [...chapterItems].sort((a, b) => Number(a.order ?? 0) - Number(b.order ?? 0));
 
-    const items = sortedItems.flatMap((ci: any) => {
+    const chapterLearningItems = sortedItems.flatMap((ci: any) => {
       const itemId = Number(ci.item_id);
       const type: string = ci.type;
 
@@ -239,6 +244,24 @@ function normalizeCourseData(data: any) {
       return [];
     });
 
+    const assignmentItems = assignmentsRaw
+      .filter((assignment: any) => String(assignment?.chapter_id ?? assignment?.chapterId ?? "") === String(chapter?.id ?? ""))
+      .map((assignment: any) => {
+        const title = getTranslationTitle(assignment, `Assignment ${assignment?.id ?? ""}`.trim());
+        const description = getTranslationDescription(assignment, "Submit your assignment.");
+
+        return {
+          id: `assignment-${assignment.id}`,
+          icon: "assignment",
+          title,
+          subtitle: description,
+          assignmentData: assignment,
+          raw: assignment,
+        };
+      });
+
+    const items = [...chapterLearningItems, ...assignmentItems];
+
     return { id, title, topicCount: items.length, items };
   });
 
@@ -250,11 +273,13 @@ function normalizeCourseData(data: any) {
 }
 
 // ─── Student sidebar item icon ─────────────────────────────────────────────────
-function ItemIcon({ type }: { type: "pdf" | "file" | "quiz" | "text" | "pptx" }) {
+function ItemIcon({ type }: { type: "pdf" | "file" | "quiz" | "text" | "pptx" | "assignment" }) {
   if (type === "pdf")
     return <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center flex-none"><FileText className="h-4 w-4 text-white" /></div>;
   if (type === "pptx")
     return <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center flex-none"><Presentation className="h-4 w-4 text-white" /></div>;
+  if (type === "assignment")
+    return <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center flex-none"><ClipboardList className="h-4 w-4 text-white" /></div>;
   if (type === "quiz")
     return <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center flex-none"><FileQuestion className="h-4 w-4 text-white" /></div>;
   if (type === "text")
@@ -346,7 +371,7 @@ export function StudentCourseDetail() {
   );
 
   const getAssessmentItems = useCallback(
-    (section: any) => (section?.items || []).filter((item: any) => item.icon === "quiz" || item.icon === "file" || item.icon === "pptx"),
+    (section: any) => (section?.items || []).filter((item: any) => item.icon === "assignment"),
     []
   );
 
@@ -361,6 +386,29 @@ export function StudentCourseDetail() {
   );
 
   const assessmentNoItemsSelected = panel === "assessment" && selectedAssessmentSectionId && assessmentSelectedItems.length === 0;
+
+  useEffect(() => {
+    if (panel !== "assessment") return;
+
+    let firstAssignment: { sectionId: string; itemIdx: number } | null = null;
+
+    for (const section of sections) {
+      const assignmentIndex = (section.items || []).findIndex((item: any) => item.icon === "assignment");
+      if (assignmentIndex >= 0) {
+        firstAssignment = { sectionId: section.id, itemIdx: assignmentIndex };
+        break;
+      }
+    }
+
+    if (firstAssignment) {
+      setSelectedAssessmentSectionId(firstAssignment.sectionId);
+      setSelectedItem(firstAssignment);
+      return;
+    }
+
+    setSelectedAssessmentSectionId(sections[0]?.id || null);
+    setSelectedItem(null);
+  }, [panel, sections]);
 
   const dispatch = useAppDispatch();
   const learningStatuses = useAppSelector((state) => state.learningStatus.statuses);
@@ -482,6 +530,14 @@ export function StudentCourseDetail() {
                 }
 
                 if (!currentItem) {
+                  if (panel === "assessment") {
+                    return (
+                      <div className="h-full flex items-center justify-center text-slate-500">
+                        No assignments available for this course.
+                      </div>
+                    );
+                  }
+
                   return (
                     <div className="h-full flex items-center justify-center text-slate-500">
                       Select a lesson or resource from the sidebar
@@ -996,6 +1052,56 @@ export function StudentCourseDetail() {
                   );
                 }
 
+                // ── ASSIGNMENT ─────────────────────────────────────────────────
+                if (currentItem.icon === "assignment") {
+                  const assignment = currentItem.assignmentData || {};
+                  const assignmentTitle = currentItem.title || "Assignment";
+                  const assignmentDescription =
+                    assignment?.description || assignment?.translations?.[0]?.description || currentItem.subtitle || "No description available.";
+
+                  return (
+                    <div className="h-full p-6 overflow-y-auto bg-slate-50">
+                      <div className="max-w-4xl mx-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center">
+                              <ClipboardList className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-slate-500">Assignment</p>
+                              <h2 className="text-2xl font-bold text-slate-900">{assignmentTitle}</h2>
+                            </div>
+                          </div>
+                          <Button asChild size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                            <Link to="/assignments">Go to Assignments</Link>
+                          </Button>
+                        </div>
+
+                        <p className="text-slate-700 leading-relaxed">{assignmentDescription}</p>
+
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-xs text-slate-500">Total Grade</p>
+                            <p className="text-lg font-semibold text-slate-900">{assignment?.grade ?? "N/A"}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-xs text-slate-500">Pass Grade</p>
+                            <p className="text-lg font-semibold text-slate-900">{assignment?.pass_grade ?? "N/A"}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-xs text-slate-500">Attempts</p>
+                            <p className="text-lg font-semibold text-slate-900">{assignment?.attempts ?? "N/A"}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-xs text-slate-500">Deadline</p>
+                            <p className="text-lg font-semibold text-slate-900">{assignment?.deadline || "No deadline"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div className="h-full flex items-center justify-center text-slate-500">
                     Content not available yet
@@ -1152,7 +1258,7 @@ export function StudentCourseDetail() {
                           const chapterTitle = section.title || `Chapter ${sectionIndex + 1}`;
                           const assessmentItems = getAssessmentItems(section);
                           const firstAssessmentIndex = (section.items || []).findIndex(
-                            (item: any) => item.icon === "quiz" || item.icon === "file" || item.icon === "pptx"
+                            (item: any) => item.icon === "assignment"
                           );
 
                           return (
@@ -1212,7 +1318,7 @@ export function StudentCourseDetail() {
                                   })}
                                 </ul>
                               ) : (
-                                <p className="mt-4 text-sm text-slate-400">No assessment items in this chapter.</p>
+                                <p className="mt-4 text-sm text-slate-400">No assignments in this chapter.</p>
                               )}
                             </div>
                           );
