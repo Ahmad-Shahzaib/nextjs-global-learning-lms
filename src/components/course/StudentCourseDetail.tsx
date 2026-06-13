@@ -1097,10 +1097,10 @@ export function StudentCourseDetail() {
                             <p className="text-xs text-slate-500">Attempts</p>
                             <p className="text-lg font-semibold text-slate-900">{assignment?.attempts ?? "N/A"}</p>
                           </div>
-                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                          {/* <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                             <p className="text-xs text-slate-500">Deadline</p>
                             <p className="text-lg font-semibold text-slate-900">{assignment?.deadline || "No deadline"}</p>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

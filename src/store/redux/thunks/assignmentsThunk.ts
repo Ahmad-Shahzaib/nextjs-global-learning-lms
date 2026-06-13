@@ -112,11 +112,6 @@ export const sendAssignmentMessage = createAsyncThunk<SendAssignmentMessageRespo
       const response = await apiClient.post<SendAssignmentMessageResponse>(
         `/v2/panel/assignments/${assignmentId}/messages`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
       );
 
       if (response.data?.success) {

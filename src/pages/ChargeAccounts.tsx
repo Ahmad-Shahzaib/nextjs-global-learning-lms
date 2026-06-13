@@ -80,28 +80,36 @@ export default function ChargeAccounts() {
 
           <div className="grid gap-4 text-sm text-slate-800 dark:text-[#f5efe8] sm:grid-cols-2">
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
-              <span className="font-semibold">Company Name</span>
-              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">GLOBAL LEARNERS EDUCATION FZE</span>
+              <span className="font-semibold">Account Holder Name</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">GLOBAL MINDS EDUCATION FZE</span>
             </div>
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
               <span className="font-semibold">Bank Name</span>
-              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">The National Bank of Ras Al Khaimah (P.S.C)</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">Mashreq Bank PSC</span>
             </div>
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
               <span className="font-semibold">Account Number</span>
-              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">0023383638001 (AED)</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">019102151312</span>
             </div>
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
               <span className="font-semibold">IBAN</span>
-              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">AE33 0400 0000 2338 3638 001</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">AE950330000019102151312</span>
             </div>
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
               <span className="font-semibold">SWIFT Code</span>
-              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">NRAKAEAK</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">BOMLAEAD</span>
             </div>
             <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
               <span className="font-semibold">Currency</span>
               <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">AED</span>
+            </div>
+            <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
+              <span className="font-semibold">Bank Branch</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">Mashreq NEO</span>
+            </div>
+            <div className="flex items-start justify-between rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 dark:border-[#2e2218] dark:bg-[#0f0d0b]">
+              <span className="font-semibold">Bank Address</span>
+              <span className="text-right font-medium text-slate-900 dark:text-[#f5efe8]">Mashreq Bank PSC, P.O. Box 1250, Dubai, UAE</span>
             </div>
           </div>
 
