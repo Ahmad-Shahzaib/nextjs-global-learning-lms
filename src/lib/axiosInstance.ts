@@ -42,7 +42,6 @@ const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10_000,
   headers: {
-    'Content-Type': 'application/json',
     'x-api-key': '1234',
   },
 });
