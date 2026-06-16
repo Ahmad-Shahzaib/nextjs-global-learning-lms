@@ -5,16 +5,15 @@
  *  - Base URL resolved from VITE_API_BASE_URL env variable (falls back to production URL)
  *  - Auth token automatically attached from the Redux store via lazy store injection
  *  - Exponential-backoff retry (up to 2 retries) for network errors and 5xx responses
+ *    (file uploads are excluded from retries — FormData bodies cannot be re-sent)
  *
  * Usage in thunks:
  *   import apiClient from '@/lib/axiosInstance';
  *   const response = await apiClient.get('/v2/some/endpoint');
  */
-
 import axios from 'axios';
 import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type { RootState } from '../store/redux/store';
-
 // ---------------------------------------------------------------------------
 // Base URL — single source of truth across the entire app
 // ---------------------------------------------------------------------------
@@ -22,7 +21,6 @@ export const API_BASE_URL =
   typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL
     ? import.meta.env.VITE_API_BASE_URL.replace(/\/?$/, '')
     : 'https://api.globalminds-education.com/api';
-
 // ---------------------------------------------------------------------------
 // Lazy store injection
 // Keeps this module free of circular dependencies.
@@ -30,22 +28,19 @@ export const API_BASE_URL =
 // ---------------------------------------------------------------------------
 type StoreRef = { getState: () => RootState };
 let storeRef: StoreRef | null = null;
-
 export function injectStore(store: StoreRef): void {
   storeRef = store;
 }
-
 // ---------------------------------------------------------------------------
 // Axios instance
 // ---------------------------------------------------------------------------
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10_000,
+  timeout: 30_000,
   headers: {
     'x-api-key': '1234',
   },
 });
-
 // ---------------------------------------------------------------------------
 // Request interceptor — attach Bearer token from Redux auth state
 // ---------------------------------------------------------------------------
@@ -59,34 +54,30 @@ apiClient.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
-
 // ---------------------------------------------------------------------------
 // Response interceptor — retry on network errors / 5xx with exponential backoff
+// File uploads (FormData) are NOT retried: the body stream is consumed on the
+// first attempt and cannot be re-sent, so retrying would silently fail.
 // ---------------------------------------------------------------------------
 const MAX_RETRIES = 2;
-
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const config = error.config as InternalAxiosRequestConfig & { __retryCount?: number };
     const status = error.response?.status;
+    const isFormData = typeof FormData !== 'undefined' && config?.data instanceof FormData;
     const isRetryable = !status || (status >= 500 && status < 600);
-
-    if (!config || !isRetryable) {
+    if (!config || !isRetryable || isFormData) {
       return Promise.reject(error);
     }
-
     config.__retryCount = config.__retryCount ?? 0;
-
     if (config.__retryCount < MAX_RETRIES) {
       config.__retryCount += 1;
       const delayMs = Math.min(1_500 * 2 ** (config.__retryCount - 1), 4_000);
       await new Promise((resolve) => setTimeout(resolve, delayMs));
       return apiClient(config);
     }
-
     return Promise.reject(error);
   },
 );
-
 export default apiClient;

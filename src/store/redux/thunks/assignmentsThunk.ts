@@ -42,17 +42,13 @@ export const fetchMyAssignments = createAsyncThunk<Assignment[], void, { rejectV
       const response = await apiClient.get<{ success: boolean; data: { assignments: Assignment[] }; message?: string }>(
         "/v2/panel/my-assignments",
       );
-
       if (response.data?.success) {
         const assignments = response.data?.data?.assignments;
-
         if (!Array.isArray(assignments)) {
           return rejectWithValue("Unexpected assignments payload format");
         }
-
         return assignments;
       }
-
       return rejectWithValue(response.data?.message || "Failed to load assignments");
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message || "Network error");
@@ -70,7 +66,6 @@ export const fetchAssignmentDetail = createAsyncThunk<Assignment, number, { reje
         message?: string;
         data: Assignment;
       }>(`/v2/panel/my-assignments/${assignmentId}`);
-
       if (response.data?.success) {
         const assignment = response.data.data;
         if (!assignment || typeof assignment !== "object") {
@@ -78,7 +73,6 @@ export const fetchAssignmentDetail = createAsyncThunk<Assignment, number, { reje
         }
         return assignment;
       }
-
       return rejectWithValue(response.data?.message || "Failed to load assignment details");
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message || "Network error");
@@ -104,20 +98,20 @@ export const sendAssignmentMessage = createAsyncThunk<SendAssignmentMessageRespo
     try {
       const formData = new FormData();
       formData.append("message", message);
-
       if (file) {
         formData.append("file", file);
       }
-
       const response = await apiClient.post<SendAssignmentMessageResponse>(
         `/v2/panel/assignments/${assignmentId}/messages`,
         formData,
+        {
+          timeout: 180_000, // 3 min — large file uploads need more than the 30s default
+          headers: { "Content-Type": "multipart/form-data" },
+        },
       );
-
       if (response.data?.success) {
         return response.data;
       }
-
       return rejectWithValue(response.data?.message || "Failed to send assignment message");
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message || "Network error");
