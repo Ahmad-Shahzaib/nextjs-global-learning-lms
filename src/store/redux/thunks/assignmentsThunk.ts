@@ -29,6 +29,7 @@ export interface Assignment {
   pass_grade: string;
   purchase_date: string;
   user_status: string;
+  feedback: string | null;
   attachments: any[];
   student: AssignmentStudent;
   can: AssignmentCan;

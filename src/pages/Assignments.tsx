@@ -219,6 +219,15 @@ const Assignments = () => {
             {selectedAssignment.description || "No description available."}
           </p>
         </div>
+
+        <div className="rounded-xl border border-orange-200/70 bg-orange-50 p-4 shadow-sm dark:border-[#2e2218] dark:bg-[#1a1410]">
+          <h3 className="text-sm font-semibold text-orange-800 dark:text-[#f5efe8]">Feedback</h3>
+          <div className="mt-2 max-h-[30vh] overflow-y-auto pr-2">
+            <p className="whitespace-pre-wrap text-sm text-orange-600 dark:text-[#a89880]">
+              {selectedAssignment.feedback || "No feedback available."}
+            </p>
+          </div>
+        </div>
       </div>
     );
   }, [selectedAssignment, selectedLoading, selectedError]);
@@ -324,7 +333,7 @@ const Assignments = () => {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-        <DialogContent className="dark:bg-[#1a1410] dark:text-[#f5efe8] dark:border-[#2e2218]">
+        <DialogContent className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-3xl flex-col overflow-hidden dark:bg-[#1a1410] dark:text-[#f5efe8] dark:border-[#2e2218]">
           <DialogHeader>
             <DialogTitle className="dark:text-[#f5efe8]">Assignment Details</DialogTitle>
             <DialogDescription className="dark:text-[#a89880]">
@@ -332,9 +341,9 @@ const Assignments = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4">{detailContent}</div>
+          <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-2">{detailContent}</div>
 
-          <DialogFooter className="mt-4 flex justify-end space-x-2">
+          <DialogFooter className="mt-4 shrink-0 flex justify-end space-x-2">
             <Button variant="outline" onClick={closeDetail}>
               Close
             </Button>
